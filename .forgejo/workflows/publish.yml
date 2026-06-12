@@ -1,0 +1,328 @@
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+# Build every platform first, publish only if all four jars built. A
+# workflow_dispatch run stops after the build job, which is enough to verify
+# the matrix compiles.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Forge 1.20.1
+            subproject: forge-1201
+            archive: forge-1.20.1
+          - name: Fabric 1.20.1
+            subproject: fabric-1201
+            archive: fabric-1.20.1
+          - name: Fabric 1.21.1
+            subproject: fabric-1211
+            archive: fabric-1.21.1
+          - name: NeoForge 1.21.1
+            subproject: neoforge-1211
+            archive: neoforge-1.21.1
+
+    name: Build ${{ matrix.name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#v}"
+          else
+            VERSION=$(grep -oP '^version=\K.*' gradle.properties)
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Using version: $VERSION"
+
+      - name: Build ${{ matrix.name }}
+        run: ./gradlew :${{ matrix.subproject }}:build -Pversion=${{ steps.version.outputs.version }} --no-daemon
+
+      - name: Resolve jar path
+        id: jar
+        run: |
+          shopt -s nullglob
+          JARS=()
+          for f in ${{ matrix.subproject }}/build/libs/betterharvestlevel-*.jar; do
+            basename="$(basename "$f")"
+            if [[ "$basename" != *-sources.jar ]] && \
+               [[ "$basename" != *-javadoc.jar ]] && \
+               [[ "$basename" != *-dev.jar ]] && \
+               [[ "$basename" != *-shadow.jar ]] && \
+               [[ "$basename" != *-slim.jar ]]; then
+              JARS+=("$f")
+            fi
+          done
+          if [[ ${#JARS[@]} -eq 0 ]]; then
+            echo "::error::No jar found for ${{ matrix.subproject }}"
+            find . -path '*/build/libs/*.jar' -print
+            exit 1
+          fi
+          if [[ ${#JARS[@]} -gt 1 ]]; then
+            echo "::error::Multiple jars found for ${{ matrix.subproject }}:"
+            printf '  %s\n' "${JARS[@]}"
+            exit 1
+          fi
+          echo "jar_path=${JARS[0]}" >> "$GITHUB_OUTPUT"
+          echo "Resolved jar: ${JARS[0]}"
+
+      # One artifact per platform; publish-mod and forgejo-release download
+      # them, so nothing ships unless all four builds succeed.
+      - name: Stash jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: jar-${{ matrix.archive }}
+          path: ${{ steps.jar.outputs.jar_path }}
+          retention-days: 1
+          if-no-files-found: error
+
+  publish-mod:
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Forge 1.20.1
+            subproject: forge-1201
+            archive: forge-1.20.1
+            mc_version: "1.20.1"
+            loader: forge
+          - name: Fabric 1.20.1
+            subproject: fabric-1201
+            archive: fabric-1.20.1
+            mc_version: "1.20.1"
+            loader: fabric
+          - name: Fabric 1.21.1
+            subproject: fabric-1211
+            archive: fabric-1.21.1
+            mc_version: "1.21.1"
+            loader: fabric
+          - name: NeoForge 1.21.1
+            subproject: neoforge-1211
+            archive: neoforge-1.21.1
+            mc_version: "1.21.1"
+            loader: neoforge
+
+    name: Publish ${{ matrix.name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Using version: $VERSION"
+
+      - name: Determine version-type
+        id: vt
+        run: |
+          case "${{ steps.version.outputs.version }}" in
+            *-alpha*) echo "type=alpha" >> "$GITHUB_OUTPUT" ;;
+            *-beta*)  echo "type=beta"  >> "$GITHUB_OUTPUT" ;;
+            *)        echo "type=release" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Download ${{ matrix.name }} jar
+        uses: actions/download-artifact@v3
+        with:
+          name: jar-${{ matrix.archive }}
+          path: jar
+
+      - name: Publish ${{ matrix.name }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: better-harvest-level
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          curseforge-id: "1494115"
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          files: jar/*.jar
+          name: "BetterHarvestLevel ${{ steps.version.outputs.version }} (${{ matrix.name }})"
+          version: ${{ steps.version.outputs.version }}+${{ matrix.subproject }}
+          version-type: ${{ steps.vt.outputs.type }}
+          changelog-file: CHANGELOG.md
+          game-versions: ${{ matrix.mc_version }}
+          loaders: ${{ matrix.loader }}
+
+  forgejo-release:
+    needs: [publish-mod]
+    if: success() && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    name: Create Forgejo release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all platform jars
+        uses: actions/download-artifact@v3
+        with:
+          path: release-jars
+
+      # Jar names already carry the platform label, so they only need collecting.
+      - name: Flatten jars
+        run: |
+          mkdir -p flat
+          mv -v release-jars/jar-*/*.jar flat/
+          ls -lh flat/
+          test "$(ls flat/*.jar | wc -l)" -eq 4 || { echo "::error::expected 4 jars, got $(ls flat/*.jar | wc -l)"; exit 1; }
+
+      - name: Build release body
+        id: body
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+
+          CHANGELOG=$(awk -v ver="v$VERSION" '
+            $0 ~ "^## "ver { in_section=1; next }
+            in_section && /^## / { exit }
+            in_section { print }
+          ' CHANGELOG.md)
+
+          {
+            echo "## Downloads"
+            echo ""
+            echo "Pick the jar that matches your loader and Minecraft version. The same files are also on:"
+            echo ""
+            echo "- [Modrinth](https://modrinth.com/mod/better-harvest-level/versions)"
+            echo "- [CurseForge](https://www.curseforge.com/projects/1494115)"
+            echo ""
+            echo "## Changelog"
+            echo ""
+            echo "$CHANGELOG"
+          } > release-body.md
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Replace any existing release
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          API="${{ github.server_url }}/api/v1/repos/${{ github.repository }}/releases"
+          # curl -f exits 22 on the 404 a fresh tag gets; that must not trip set -e
+          RID=$(curl -sf -H "Authorization: token $TOKEN" "$API/tags/${{ github.ref_name }}" | jq -r '.id // empty' || true)
+          if [[ -n "$RID" ]]; then
+            echo "Deleting existing release id=$RID"
+            curl -fsS -X DELETE -H "Authorization: token $TOKEN" "$API/$RID"
+          else
+            echo "No existing release for tag ${{ github.ref_name }}"
+          fi
+
+      - name: Create release
+        id: create
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          VERSION="${{ steps.body.outputs.version }}"
+          case "$VERSION" in
+            *-alpha*|*-beta*|*-rc*) PRERELEASE=true ;;
+            *)                      PRERELEASE=false ;;
+          esac
+          PAYLOAD=$(jq -n \
+            --arg tag "${{ github.ref_name }}" \
+            --arg name "BetterHarvestLevel $VERSION" \
+            --rawfile body release-body.md \
+            --argjson prerelease "$PRERELEASE" \
+            '{tag_name:$tag, name:$name, body:$body, draft:false, prerelease:$prerelease}')
+          RESP=$(curl -fsS -X POST -H "Authorization: token $TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary "$PAYLOAD" \
+            "${{ github.server_url }}/api/v1/repos/${{ github.repository }}/releases")
+          RID=$(echo "$RESP" | jq -r .id)
+          echo "release_id=$RID" >> "$GITHUB_OUTPUT"
+          echo "Created release id=$RID"
+
+      - name: Upload jars as release assets
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RID: ${{ steps.create.outputs.release_id }}
+        run: |
+          set -e
+          for jar in flat/*.jar; do
+            name=$(basename "$jar")
+            echo "Uploading $name ($(stat -c%s "$jar") bytes)..."
+            curl -fsS -X POST -H "Authorization: token $TOKEN" \
+              -H "Content-Type: application/java-archive" \
+              --data-binary @"$jar" \
+              "${{ github.server_url }}/api/v1/repos/${{ github.repository }}/releases/$RID/assets?name=$name" \
+              > /dev/null
+          done
+          echo "All 4 jars uploaded."
+
+  notify-discord:
+    needs: [publish-mod, forgejo-release]
+    if: success() && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    name: Announce release in Discord
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build payload
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+
+          CHANGELOG=$(awk -v ver="v$VERSION" '
+            $0 ~ "^## "ver { in_section=1; next }
+            in_section && /^## / { exit }
+            in_section { print }
+          ' CHANGELOG.md)
+
+          jq -n \
+            --arg mod "betterharvestlevel" \
+            --arg version "$VERSION" \
+            --arg tag "${{ github.ref_name }}" \
+            --arg changelog "$CHANGELOG" \
+            --argjson platforms '[
+              "Forge 1.20.1",
+              "Fabric 1.20.1",
+              "Fabric 1.21.1",
+              "NeoForge 1.21.1"
+            ]' \
+            '{mod:$mod, version:$version, tag:$tag, changelog:$changelog, platforms:$platforms, ping:true}' \
+            > payload.json
+
+          echo "Payload size: $(wc -c < payload.json) bytes"
+
+      - name: POST to discord-bot
+        env:
+          SECRET: ${{ secrets.DISCORD_RELEASE_WEBHOOK_SECRET }}
+        run: |
+          SIG=$(openssl dgst -sha256 -hmac "$SECRET" -hex < payload.json | awk '{print $NF}')
+          curl -fSs -X POST "http://discord-bot:8080/webhook/release" \
+            -H "Content-Type: application/json" \
+            -H "X-Webhook-Signature: sha256=$SIG" \
+            --data-binary @payload.json
