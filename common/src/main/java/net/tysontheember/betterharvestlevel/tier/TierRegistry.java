@@ -7,16 +7,19 @@ import net.tysontheember.betterharvestlevel.config.TierDefinition;
 import net.tysontheember.betterharvestlevel.config.TiersConfig;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TierRegistry {
     private final List<TierDefinition> orderedTiers = new ArrayList<>();
     private final Map<String, TierDefinition> tiersByName = new LinkedHashMap<>();
     private final Map<String, Set<String>> equivalenceMap = new HashMap<>();
+    private final Set<String> unresolvedWarned = ConcurrentHashMap.newKeySet();
 
     public void loadFromConfig(TiersConfig tiersConfig, EquivalencesConfig equivConfig) {
         orderedTiers.clear();
         tiersByName.clear();
         equivalenceMap.clear();
+        unresolvedWarned.clear();
 
         // Add tiers in order from config
         if (tiersConfig.getTiers() != null) {
@@ -68,6 +71,8 @@ public class TierRegistry {
         TierDefinition requiredTier = tiersByName.get(requiredTierName);
 
         if (toolTier == null || requiredTier == null) {
+            if (toolTier == null) warnUnresolved(toolTierName);
+            if (requiredTier == null) warnUnresolved(requiredTierName);
             return true; // If we can't resolve, allow mining
         }
 
@@ -88,6 +93,12 @@ public class TierRegistry {
         }
 
         return false;
+    }
+
+    private void warnUnresolved(String tierName) {
+        if (unresolvedWarned.add(tierName)) {
+            Constants.LOG.warn("Tier '{}' is not defined in tiers.json; allowing mining", tierName);
+        }
     }
 
     public int getTierCount() {

@@ -12,12 +12,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.tysontheember.betterharvestlevel.BHLManager;
 import net.tysontheember.betterharvestlevel.Constants;
-import net.tysontheember.betterharvestlevel.TierLevelHelper;
 import net.tysontheember.betterharvestlevel.config.TierDefinition;
 import net.tysontheember.betterharvestlevel.platform.Services;
 import snownee.jade.api.BlockAccessor;
@@ -77,7 +75,7 @@ public final class BHLHarvestToolProvider {
         tooltip.remove(HARVEST_TOOL_UID);
 
         ItemStack iconStack = resolveIconItem(tierDef);
-        boolean canHarvest = checkCanHarvest(accessor.getPlayer(), requiredTierName);
+        boolean canHarvest = checkCanHarvest(accessor.getPlayer(), accessor.getBlockState());
 
         IElementHelper helper = IElementHelper.get();
 
@@ -149,32 +147,8 @@ public final class BHLHarvestToolProvider {
         };
     }
 
-    private static boolean checkCanHarvest(Player player, String requiredTierName) {
-        if (player == null) {
-            return false;
-        }
-
-        ItemStack held = player.getMainHandItem();
-        if (held.isEmpty()) {
-            return false;
-        }
-
-        if (held.getItem() instanceof TieredItem tieredItem) {
-            String toolTierName = Services.TIER_SERVICE.getToolTier(
-                    BuiltInRegistries.ITEM.getKey(held.getItem()).toString());
-
-            if (toolTierName == null) {
-                toolTierName = TierLevelHelper.getTierName(tieredItem.getTier());
-                if (toolTierName == null) {
-                    toolTierName = TierLevelHelper.getTierNameByVanillaLevel(
-                            TierLevelHelper.getLevel(tieredItem.getTier()));
-                }
-            }
-
-            return BHLManager.getInstance().getTierRegistry().canMine(toolTierName, requiredTierName);
-        }
-
-        return false;
+    private static boolean checkCanHarvest(Player player, BlockState state) {
+        return player != null && player.hasCorrectToolForDrops(state);
     }
 
     /**
