@@ -9,27 +9,14 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-/**
- * Resolves override targets (block/tag/mod/regex) against a set of known registry IDs.
- * This is called from platform-specific code which provides the actual registry contents.
- */
 public final class OverrideResolver {
 
     private OverrideResolver() {}
 
-    /**
-     * Resolve block overrides against the known block IDs.
-     * @param overrides the configured overrides
-     * @param allBlockIds all known block resource location strings (e.g. "minecraft:stone")
-     * @param tagResolver resolves a tag string (e.g. "#minecraft:needs_iron_tool") to a set of block IDs
-     * @param ignoredMods mods whose blocks should be skipped
-     * @return map of block ID -> required tier name
-     */
     public static Map<String, String> resolveBlockOverrides(
             List<BlockOverride> overrides,
             Set<String> allBlockIds,
-            Function<String, Set<String>> tagResolver,
-            Set<String> ignoredMods) {
+            Function<String, Set<String>> tagResolver) {
 
         Map<String, String> resolved = new LinkedHashMap<>();
 
@@ -50,9 +37,7 @@ public final class OverrideResolver {
                         Set<String> tagMembers = tagResolver.apply(target.substring(1));
                         if (tagMembers != null) {
                             for (String id : tagMembers) {
-                                if (!isIgnored(id, ignoredMods)) {
-                                    putWithConflictLog(resolved, id, tier, "block");
-                                }
+                                putWithConflictLog(resolved, id, tier, "block");
                             }
                         }
                     }
@@ -61,7 +46,7 @@ public final class OverrideResolver {
                 case "mod":
                     String namespace = target.endsWith(":*") ? target.substring(0, target.length() - 2) : target;
                     for (String id : allBlockIds) {
-                        if (id.startsWith(namespace + ":") && !isIgnored(id, ignoredMods)) {
+                        if (id.startsWith(namespace + ":")) {
                             putWithConflictLog(resolved, id, tier, "block");
                         }
                     }
@@ -71,7 +56,7 @@ public final class OverrideResolver {
                     try {
                         Pattern pattern = Pattern.compile(target);
                         for (String id : allBlockIds) {
-                            if (pattern.matcher(id).matches() && !isIgnored(id, ignoredMods)) {
+                            if (pattern.matcher(id).matches()) {
                                 putWithConflictLog(resolved, id, tier, "block");
                             }
                         }
@@ -88,19 +73,10 @@ public final class OverrideResolver {
         return resolved;
     }
 
-    /**
-     * Resolve tool overrides against the known item IDs.
-     * @param overrides the configured overrides
-     * @param allItemIds all known item resource location strings
-     * @param tagResolver resolves a tag string to a set of item IDs
-     * @param ignoredMods mods whose items should be skipped
-     * @return map of item ID -> tier name
-     */
     public static Map<String, String> resolveToolOverrides(
             List<ToolOverride> overrides,
             Set<String> allItemIds,
-            Function<String, Set<String>> tagResolver,
-            Set<String> ignoredMods) {
+            Function<String, Set<String>> tagResolver) {
 
         Map<String, String> resolved = new LinkedHashMap<>();
 
@@ -121,9 +97,7 @@ public final class OverrideResolver {
                         Set<String> tagMembers = tagResolver.apply(target.substring(1));
                         if (tagMembers != null) {
                             for (String id : tagMembers) {
-                                if (!isIgnored(id, ignoredMods)) {
-                                    putWithConflictLog(resolved, id, tier, "tool");
-                                }
+                                putWithConflictLog(resolved, id, tier, "tool");
                             }
                         }
                     }
@@ -132,7 +106,7 @@ public final class OverrideResolver {
                 case "mod":
                     String namespace = target.endsWith(":*") ? target.substring(0, target.length() - 2) : target;
                     for (String id : allItemIds) {
-                        if (id.startsWith(namespace + ":") && !isIgnored(id, ignoredMods)) {
+                        if (id.startsWith(namespace + ":")) {
                             putWithConflictLog(resolved, id, tier, "tool");
                         }
                     }
@@ -142,7 +116,7 @@ public final class OverrideResolver {
                     try {
                         Pattern pattern = Pattern.compile(target);
                         for (String id : allItemIds) {
-                            if (pattern.matcher(id).matches() && !isIgnored(id, ignoredMods)) {
+                            if (pattern.matcher(id).matches()) {
                                 putWithConflictLog(resolved, id, tier, "tool");
                             }
                         }
@@ -165,12 +139,5 @@ public final class OverrideResolver {
             Constants.LOG.warn("BHL {} override conflict: '{}' changed from tier '{}' to '{}' (later override wins)",
                 kind, id, existing, newTier);
         }
-    }
-
-    private static boolean isIgnored(String id, Set<String> ignoredMods) {
-        if (ignoredMods == null || ignoredMods.isEmpty()) return false;
-        int colonIdx = id.indexOf(':');
-        if (colonIdx < 0) return false;
-        return ignoredMods.contains(id.substring(0, colonIdx));
     }
 }

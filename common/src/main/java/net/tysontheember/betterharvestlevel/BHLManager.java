@@ -2,62 +2,48 @@ package net.tysontheember.betterharvestlevel;
 
 import net.tysontheember.betterharvestlevel.config.BHLConfig;
 import net.tysontheember.betterharvestlevel.config.ConfigIO;
-import net.tysontheember.betterharvestlevel.platform.Services;
-import net.tysontheember.betterharvestlevel.platform.services.ITierService;
 import net.tysontheember.betterharvestlevel.tier.TierRegistry;
 
 import java.nio.file.Path;
 
-/**
- * Central manager for BetterHarvestLevel. Holds the loaded config and tier registry.
- * Platform-specific code should call init() during mod setup and reload() for hot-reloading.
- */
 public final class BHLManager {
-    private static BHLManager instance;
+    private static Path configDir;
+    private static BHLConfig config;
+    private static TierRegistry tiers;
 
-    private final Path configDir;
-    private BHLConfig config;
-    private final TierRegistry tierRegistry = new TierRegistry();
+    private BHLManager() {}
 
-    private BHLManager(Path configDir) {
-        this.configDir = configDir;
+    public static synchronized void init(Path dir) {
+        configDir = dir;
+        reload();
     }
 
-    public static void init(Path configDir) {
-        instance = new BHLManager(configDir);
-        instance.loadConfig();
-        instance.applyAll();
-    }
-
-    public static BHLManager getInstance() {
-        if (instance == null) {
-            throw new IllegalStateException("BHLManager has not been initialized yet");
-        }
-        return instance;
-    }
-
-    public void loadConfig() {
+    public static synchronized void reload() {
         config = ConfigIO.load(configDir);
-        tierRegistry.loadFromConfig(config.getTiersConfig(), config.getEquivalencesConfig());
-        Constants.LOG.info("BetterHarvestLevel config loaded: {} tiers, {} block overrides, {} tool overrides",
-            tierRegistry.getTierCount(),
-            config.getBlockOverrides().size(),
-            config.getToolOverrides().size());
+        tiers = TierRegistry.of(config.getTiersConfig().getTiers(), config.getEquivalencesConfig().getGroups());
+        config.getBlockOverrides().removeIf(o -> {
+            if (!tiers.knows(o.getRequiredTier())) {
+                Constants.LOG.error("Dropping block override '{}': unknown tier '{}'", o.getTarget(), o.getRequiredTier());
+                return true;
+            }
+            return false;
+        });
+        config.getToolOverrides().removeIf(o -> {
+            if (!tiers.knows(o.getTier())) {
+                Constants.LOG.error("Dropping tool override '{}': unknown tier '{}'", o.getTarget(), o.getTier());
+                return true;
+            }
+            return false;
+        });
+        Constants.LOG.info("Loaded {} tiers, {} block overrides, {} tool overrides",
+                tiers.ordered().size(), config.getBlockOverrides().size(), config.getToolOverrides().size());
     }
 
-    public void applyAll() {
-        ITierService tierService = Services.TIER_SERVICE;
-        tierService.registerCustomTiers(tierRegistry);
-        tierService.applyBlockOverrides(config.getBlockOverrides(), tierRegistry);
-        tierService.applyToolOverrides(config.getToolOverrides(), tierRegistry);
+    public static BHLConfig config() {
+        return config;
     }
 
-    public void reload() {
-        loadConfig();
-        applyAll();
-        Constants.LOG.info("BetterHarvestLevel config reloaded");
+    public static TierRegistry tiers() {
+        return tiers;
     }
-
-    public BHLConfig getConfig() { return config; }
-    public TierRegistry getTierRegistry() { return tierRegistry; }
 }

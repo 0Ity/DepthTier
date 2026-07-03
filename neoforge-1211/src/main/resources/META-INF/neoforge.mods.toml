@@ -9,12 +9,6 @@ displayName = "${mod_name}"
 authors = "${mod_author}"
 description = '''${description}'''
 
-[[mixins]]
-config = "betterharvestlevel.mixins.json"
-
-[[mixins]]
-config = "betterharvestlevel.jade.mixins.json"
-
 [[dependencies."${mod_id}"]]
 modId = "neoforge"
 type = "required"
