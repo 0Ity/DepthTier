@@ -38,11 +38,13 @@ public final class VanillaProbe {
 
     public static String toolTier(ItemStack stack) {
         if (stack.isEmpty()) return TierRegistry.HAND;
-        if (!(stack.getItem() instanceof TieredItem tiered)) return null;
-        Tier tier = tiered.getTier();
-        String known = VANILLA_TIERS.get(tier);
-        if (known != null) return known;
-        return BY_INCORRECT_TAG.get(tier.getIncorrectBlocksForDrops());
+        if (stack.getItem() instanceof TieredItem tiered) {
+            Tier tier = tiered.getTier();
+            String known = VANILLA_TIERS.get(tier);
+            if (known != null) return known;
+            return BY_INCORRECT_TAG.get(tier.getIncorrectBlocksForDrops());
+        }
+        return stack.has(DataComponents.TOOL) ? null : TierRegistry.HAND;
     }
 
     public static boolean toolTypeOk(ItemStack stack, BlockState state) {

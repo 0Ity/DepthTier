@@ -13,6 +13,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.tysontheember.betterharvestlevel.ActiveRules;
 import net.tysontheember.betterharvestlevel.BHLManager;
+import net.tysontheember.betterharvestlevel.HarvestVerdict;
 import net.tysontheember.betterharvestlevel.ServerRules;
 import net.tysontheember.betterharvestlevel.VanillaProbe;
 
@@ -49,7 +50,9 @@ public final class BHLCommand {
         String required = blockOverride != null ? blockOverride : VanillaProbe.requiredTier(state);
         String toolOverride = rules == null ? null : rules.itemTier(held.getItem());
         String tool = toolOverride != null ? toolOverride : String.valueOf(VanillaProbe.toolTier(held));
-        boolean can = player.hasCorrectToolForDrops(state);
+        boolean vanillaCan = player.hasCorrectToolForDrops(state);
+        boolean can = rules == null ? vanillaCan
+                : HarvestVerdict.evaluate(rules, held, state, vanillaCan).orElse(vanillaCan);
         context.getSource().sendSuccess(() -> Component.literal(
                 "block requires " + required + (blockOverride != null ? " (override)" : "")
                         + ", tool is " + tool + (toolOverride != null ? " (override)" : "")

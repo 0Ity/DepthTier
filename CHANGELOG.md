@@ -12,7 +12,7 @@
 
 ### Known limitations
 
-- Block overrides cannot gate tools whose tier the mod cannot derive: modded tools that are not vanilla `TieredItem` and have no `tools.json` override fall back to vanilla behavior. Add an explicit `tools.json` override for that tool to work around this.
+- Block overrides cannot gate tools whose tier the mod cannot derive: modded tools that carry a `minecraft:tool` data component but are not vanilla `TieredItem` and have no `tools.json` override fall back to vanilla behavior. Add an explicit `tools.json` override for that tool to work around this. Plain items with no tool component at all are treated as a bare hand.
 
 ## v1.1.0
 
