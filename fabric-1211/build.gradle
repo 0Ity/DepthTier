@@ -1,0 +1,49 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.fabricmc.fabric-loom-remap' version '1.15.5'
+}
+
+def mcVersion = '1.21.1'
+
+base {
+    archivesName = "${mod_id}-fabric-${mcVersion}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+sourceSets.main {
+    java.srcDir rootProject.file('shared/mc1211/java')
+    resources.srcDir rootProject.file('shared/mc1211/resources')
+}
+
+loom {
+    mixin {
+        defaultRefmapName = "${mod_id}.mixins.refmap.json"
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${mcVersion}"
+    mappings loom.officialMojangMappings()
+    modImplementation 'net.fabricmc:fabric-loader:0.16.9'
+    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.107.0+1.21.1'
+    modCompileOnly 'maven.modrinth:jade:15.10.5+fabric'
+    modLocalRuntime 'maven.modrinth:jade:15.10.5+fabric'
+}
+
+processResources {
+    var expandProps = [
+        'version'    : version,
+        'mod_name'   : mod_name,
+        'mod_id'     : mod_id,
+        'mod_author' : mod_author,
+        'license'    : license,
+        'description': description,
+    ]
+    filesMatching(['pack.mcmeta', 'fabric.mod.json']) {
+        expand expandProps
+    }
+    inputs.properties(expandProps)
+}

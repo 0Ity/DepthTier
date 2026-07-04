@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${description}",
+  "authors": ["${mod_author}"],
+  "license": "${license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["net.tysontheember.betterharvestlevel.fabric.BetterHarvestLevelFabric"],
+    "client": ["net.tysontheember.betterharvestlevel.fabric.BetterHarvestLevelFabricClient"],
+    "jade": ["net.tysontheember.betterharvestlevel.compat.jade.BHLJadePlugin"]
+  },
+  "mixins": ["betterharvestlevel.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.1",
+    "java": ">=21"
+  }
+}

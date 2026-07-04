@@ -8,4 +8,9 @@ public final class RulesAccess {
     public static ActiveRules get(Level level) {
         return level.isClientSide ? ClientRules.current() : ServerRules.current();
     }
+
+    public static ActiveRules current() {
+        ActiveRules server = ServerRules.current();
+        return server != null ? server : ClientRules.current();
+    }
 }
