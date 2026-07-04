@@ -1,0 +1,66 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev' version '2.0.141'
+}
+
+def mcVersion = '26.2'
+
+base {
+    archivesName = "${mod_id}-neoforge-${mcVersion}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+}
+
+sourceSets.main {
+    java.srcDir rootProject.file('shared/mc26x/java')
+    resources.srcDir rootProject.file('shared/mc26x/resources')
+}
+
+neoForge {
+    version = '26.2.0.6-beta'
+
+    runs {
+        configureEach {
+            ideName = "NeoForge ${it.name.capitalize()} 26.2"
+        }
+        client {
+            client()
+        }
+        server {
+            server()
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    compileOnly 'maven.modrinth:jade:26.2.8+neoforge'
+    runtimeOnly 'maven.modrinth:jade:26.2.8+neoforge'
+}
+
+processResources {
+    var expandProps = [
+        'version'                      : version,
+        'mod_name'                     : mod_name,
+        'mod_id'                       : mod_id,
+        'mod_author'                   : mod_author,
+        'license'                      : license,
+        'description'                  : description,
+        'minecraft_version'            : mcVersion,
+        'minecraft_version_range'      : '[26.2,26.3)',
+        'neoforge_version'             : '26.2.0.6-beta',
+        'neoforge_loader_version_range': '[4,)',
+        'java_version'                 : '25',
+    ]
+    filesMatching(['pack.mcmeta', 'META-INF/neoforge.mods.toml']) {
+        expand expandProps
+    }
+    inputs.properties(expandProps)
+}
