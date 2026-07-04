@@ -71,7 +71,9 @@ public final class BhlToolHandler implements ToolHandler {
         if (item != null) return new ItemStack(item);
         TierDefinition def = rules.tiers().byName(tier);
         if (def != null && def.iconItem != null) {
-            return BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(def.iconItem))
+            ResourceLocation iconId = ResourceLocation.tryParse(def.iconItem);
+            if (iconId == null) return ItemStack.EMPTY;
+            return BuiltInRegistries.ITEM.getOptional(iconId)
                     .map(ItemStack::new).orElse(ItemStack.EMPTY);
         }
         return ItemStack.EMPTY;

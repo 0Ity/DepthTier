@@ -28,18 +28,30 @@ public final class ServerRules {
                 .map(ResourceLocation::toString).collect(Collectors.toSet());
         Set<String> itemIds = BuiltInRegistries.ITEM.keySet().stream()
                 .map(ResourceLocation::toString).collect(Collectors.toSet());
-        Function<String, Set<String>> blockTags = tag ->
-                BuiltInRegistries.BLOCK.getTag(TagKey.create(Registries.BLOCK, ResourceLocation.parse(tag)))
-                        .map(named -> named.stream()
-                                .map(h -> h.unwrapKey().orElseThrow().location().toString())
-                                .collect(Collectors.toSet()))
-                        .orElse(Set.of());
-        Function<String, Set<String>> itemTags = tag ->
-                BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, ResourceLocation.parse(tag)))
-                        .map(named -> named.stream()
-                                .map(h -> h.unwrapKey().orElseThrow().location().toString())
-                                .collect(Collectors.toSet()))
-                        .orElse(Set.of());
+        Function<String, Set<String>> blockTags = tag -> {
+            ResourceLocation id = ResourceLocation.tryParse(tag);
+            if (id == null) {
+                Constants.LOG.error("Ignoring malformed tag id '{}'", tag);
+                return Set.of();
+            }
+            return BuiltInRegistries.BLOCK.getTag(TagKey.create(Registries.BLOCK, id))
+                    .map(named -> named.stream()
+                            .map(h -> h.unwrapKey().orElseThrow().location().toString())
+                            .collect(Collectors.toSet()))
+                    .orElse(Set.of());
+        };
+        Function<String, Set<String>> itemTags = tag -> {
+            ResourceLocation id = ResourceLocation.tryParse(tag);
+            if (id == null) {
+                Constants.LOG.error("Ignoring malformed tag id '{}'", tag);
+                return Set.of();
+            }
+            return BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, id))
+                    .map(named -> named.stream()
+                            .map(h -> h.unwrapKey().orElseThrow().location().toString())
+                            .collect(Collectors.toSet()))
+                    .orElse(Set.of());
+        };
 
         rules.blocks = OverrideResolver.resolveBlockOverrides(config.getBlockOverrides(), blockIds, blockTags);
         rules.items = OverrideResolver.resolveToolOverrides(config.getToolOverrides(), itemIds, itemTags);

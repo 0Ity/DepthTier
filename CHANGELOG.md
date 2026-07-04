@@ -10,6 +10,10 @@
 - Jade shows the modified harvest requirements (required-tool icon and harvestability check), including custom tier icons via `iconItem`
 - Added `/bhl info`, `/bhl check`, and `/bhl reload` commands; reload re-resolves tag, mod, and regex overrides and re-syncs all clients, fixing the old reload bug
 
+### Known limitations
+
+- Block overrides cannot gate tools whose tier the mod cannot derive: modded tools that are not vanilla `TieredItem` and have no `tools.json` override fall back to vanilla behavior. Add an explicit `tools.json` override for that tool to work around this.
+
 ## v1.1.0
 
 - Ores can no longer be mined with any sufficiently-tiered tool: vanilla's tool-type check (`mineable/*` tags) is preserved, BHL only tightens the tier requirement on top of it (#3)
