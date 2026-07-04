@@ -18,6 +18,7 @@ import net.tysontheember.betterharvestlevel.tier.TierRegistry;
 import snownee.jade.addon.harvest.HarvestToolProvider;
 import snownee.jade.addon.harvest.ToolHandler;
 import snownee.jade.api.JadeIds;
+import snownee.jade.util.CommonProxy;
 
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,16 @@ public final class BhlToolHandler implements ToolHandler {
     public static void wrapAll() {
         TOOL_CLASSES.forEach((uid, tag) -> HarvestToolProvider.registerHandler(() ->
                 new BhlToolHandler(HarvestToolProvider.TOOL_HANDLERS.get(uid), tag, uid)));
+        CommonProxy.registerTagsUpdatedListener((provider, client) -> rewrapLive());
+    }
+
+    private static void rewrapLive() {
+        TOOL_CLASSES.forEach((uid, tag) -> {
+            ToolHandler current = HarvestToolProvider.TOOL_HANDLERS.get(uid);
+            ToolHandler vanilla = current instanceof BhlToolHandler wrapped ? wrapped.vanilla : current;
+            HarvestToolProvider.TOOL_HANDLERS.put(uid, new BhlToolHandler(vanilla, tag, uid));
+        });
+        HarvestToolProvider.INSTANCE.invalidateCache();
     }
 
     @Override
