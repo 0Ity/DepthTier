@@ -1,0 +1,14 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { name = 'MinecraftForge'; url = uri('https://maven.minecraftforge.net/') }
+        maven { name = 'Parchment'; url = uri('https://maven.parchmentmc.org') }
+        maven { name = 'Sponge'; url = uri('https://repo.spongepowered.org/repository/maven-public/') }
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
+rootProject.name = 'betterharvestlevel-forge-1201'
