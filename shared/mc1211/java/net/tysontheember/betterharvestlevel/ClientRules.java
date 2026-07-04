@@ -1,5 +1,6 @@
 package net.tysontheember.betterharvestlevel;
 
+import net.tysontheember.betterharvestlevel.compat.jade.JadeCompat;
 import net.tysontheember.betterharvestlevel.rules.ResolvedRules;
 
 public final class ClientRules {
@@ -9,6 +10,7 @@ public final class ClientRules {
 
     public static void accept(String json) {
         active = ActiveRules.from(ResolvedRules.fromJson(json));
+        JadeCompat.invalidateHarvestCache();
     }
 
     public static void clear() {
