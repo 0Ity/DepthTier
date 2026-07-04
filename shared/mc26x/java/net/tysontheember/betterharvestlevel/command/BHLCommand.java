@@ -35,7 +35,7 @@ public final class BHLCommand {
                         .then(Commands.literal("hand").executes(BHLCommand::checkHand))
                         .then(Commands.literal("block").executes(BHLCommand::checkBlock)))
                 .then(Commands.literal("reload")
-                        .requires(source -> source.hasPermission(2))
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(context -> reload(context, resyncAll))));
     }
 

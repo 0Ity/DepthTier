@@ -16,5 +16,6 @@ plugins {
 rootProject.name = 'BetterHarvestLevel'
 include 'common'
 include 'neoforge-1211'
+include 'neoforge-261'
 include 'fabric-1211'
 include 'fabric-1201'

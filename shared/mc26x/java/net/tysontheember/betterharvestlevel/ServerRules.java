@@ -36,7 +36,7 @@ public final class ServerRules {
             }
             return BuiltInRegistries.BLOCK.get(TagKey.create(Registries.BLOCK, id))
                     .map(named -> named.stream()
-                            .map(h -> h.unwrapKey().orElseThrow().location().toString())
+                            .map(h -> h.unwrapKey().orElseThrow().identifier().toString())
                             .collect(Collectors.toSet()))
                     .orElse(Set.of());
         };
@@ -48,7 +48,7 @@ public final class ServerRules {
             }
             return BuiltInRegistries.ITEM.get(TagKey.create(Registries.ITEM, id))
                     .map(named -> named.stream()
-                            .map(h -> h.unwrapKey().orElseThrow().location().toString())
+                            .map(h -> h.unwrapKey().orElseThrow().identifier().toString())
                             .collect(Collectors.toSet()))
                     .orElse(Set.of());
         };

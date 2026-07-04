@@ -6,7 +6,7 @@ public final class RulesAccess {
     private RulesAccess() {}
 
     public static ActiveRules get(Level level) {
-        return level.isClientSide ? ClientRules.current() : ServerRules.current();
+        return level.isClientSide() ? ClientRules.current() : ServerRules.current();
     }
 
     public static ActiveRules current() {
