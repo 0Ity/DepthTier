@@ -2,6 +2,7 @@ package net.tysontheember.betterharvestlevel.tier;
 
 import net.tysontheember.betterharvestlevel.config.EquivalenceGroup;
 import net.tysontheember.betterharvestlevel.config.TierDefinition;
+import net.tysontheember.betterharvestlevel.config.TiersConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -64,5 +65,13 @@ class TierRegistryTest {
                 List.of());
         assertEquals(2, r.byName("iron").level);
         assertEquals(-1, r.byName(TierRegistry.HAND).level);
+    }
+
+    @Test
+    void defaultLadderIncludesCopperBetweenStoneAndIron() {
+        TierRegistry registry = TierRegistry.of(TiersConfig.createDefault().getTiers(), List.of());
+        assertTrue(registry.canMine("copper", "stone"));
+        assertTrue(registry.canMine("iron", "copper"));
+        assertFalse(registry.canMine("copper", "iron"));
     }
 }
