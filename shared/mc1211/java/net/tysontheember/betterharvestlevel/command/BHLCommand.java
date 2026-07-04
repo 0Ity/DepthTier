@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -20,6 +21,7 @@ import net.tysontheember.betterharvestlevel.HarvestVerdict;
 import net.tysontheember.betterharvestlevel.ServerRules;
 import net.tysontheember.betterharvestlevel.VanillaProbe;
 import net.tysontheember.betterharvestlevel.config.TierDefinition;
+import net.tysontheember.betterharvestlevel.tier.TierRegistry;
 
 public final class BHLCommand {
     private BHLCommand() {}
@@ -62,15 +64,26 @@ public final class BHLCommand {
                 : HarvestVerdict.evaluate(rules, held, state, vanillaCan).orElse(vanillaCan);
 
         MutableComponent message = Component.empty()
-                .append(Component.literal("Block requires ").withStyle(ChatFormatting.GRAY))
-                .append(tierName(required));
+                .append(state.getBlock().getName().withStyle(ChatFormatting.AQUA));
+        if (TierRegistry.HAND.equals(required)) {
+            message.append(Component.literal(" can be mined by hand").withStyle(ChatFormatting.GRAY));
+        } else {
+            message.append(Component.literal(" requires ").withStyle(ChatFormatting.GRAY));
+            message.append(tierName(required));
+            message.append(Component.literal(" " + toolWord(state)));
+        }
         if (blockOverride != null) {
             message.append(Component.literal(" (override)").withStyle(ChatFormatting.GRAY));
         }
-        message.append(Component.literal(", tool is ").withStyle(ChatFormatting.GRAY));
-        message.append(tool != null ? tierName(tool) : Component.literal("Unknown").withStyle(ChatFormatting.GRAY));
-        if (toolOverride != null) {
-            message.append(Component.literal(" (override)").withStyle(ChatFormatting.GRAY));
+        message.append(Component.literal(", holding ").withStyle(ChatFormatting.GRAY));
+        message.append(held.isEmpty() ? Component.literal("Bare Hand") : held.getHoverName());
+        if (!held.isEmpty()) {
+            message.append(Component.literal(" (tier ").withStyle(ChatFormatting.GRAY));
+            message.append(tool != null ? tierName(tool) : Component.literal("Unknown").withStyle(ChatFormatting.GRAY));
+            if (toolOverride != null) {
+                message.append(Component.literal(", override").withStyle(ChatFormatting.GRAY));
+            }
+            message.append(Component.literal(")").withStyle(ChatFormatting.GRAY));
         }
         message.append(Component.literal(", drops: ").withStyle(ChatFormatting.GRAY));
         message.append(Component.literal(can ? "yes" : "no").withStyle(can ? ChatFormatting.GREEN : ChatFormatting.RED));
@@ -90,6 +103,14 @@ public final class BHLCommand {
         context.getSource().sendSuccess(() -> Component.literal("BetterHarvestLevel reloaded ("
                 + tierCount + " tiers, " + blockRuleCount + " block rules, " + itemRuleCount + " tool rules)"), true);
         return 1;
+    }
+
+    private static String toolWord(BlockState state) {
+        if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) return "Pickaxe";
+        if (state.is(BlockTags.MINEABLE_WITH_AXE)) return "Axe";
+        if (state.is(BlockTags.MINEABLE_WITH_SHOVEL)) return "Shovel";
+        if (state.is(BlockTags.MINEABLE_WITH_HOE)) return "Hoe";
+        return "Tool";
     }
 
     private static Component tierName(String tier) {
