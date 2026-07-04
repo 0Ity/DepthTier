@@ -1,6 +1,6 @@
 plugins {
     id 'multiloader-loader'
-    id 'net.neoforged.moddev'
+    id 'net.neoforged.moddev' version '2.0.141'
 }
 
 def mcVersion = '1.21.1'
