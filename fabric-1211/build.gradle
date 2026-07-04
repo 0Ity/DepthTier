@@ -18,12 +18,6 @@ sourceSets.main {
     resources.srcDir rootProject.file('shared/mc1211/resources')
 }
 
-loom {
-    mixin {
-        defaultRefmapName = "${mod_id}.mixins.refmap.json"
-    }
-}
-
 dependencies {
     minecraft "com.mojang:minecraft:${mcVersion}"
     mappings loom.officialMojangMappings()
