@@ -1,0 +1,11 @@
+package net.tysontheember.betterharvestlevel;
+
+import net.minecraft.world.level.Level;
+
+public final class RulesAccess {
+    private RulesAccess() {}
+
+    public static ActiveRules get(Level level) {
+        return level.isClientSide ? ClientRules.current() : ServerRules.current();
+    }
+}
