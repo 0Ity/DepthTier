@@ -2,7 +2,7 @@
   "required": true,
   "package": "net.tysontheember.betterharvestlevel.fabric.mixin",
   "compatibilityLevel": "JAVA_25",
-  "mixins": ["ItemStackMixin"],
+  "mixins": ["ItemStackMixin", "PlayerMixin"],
   "injectors": {
     "defaultRequire": 1
   }

@@ -2,8 +2,7 @@
   "required": true,
   "package": "net.tysontheember.betterharvestlevel.fabric.mixin",
   "compatibilityLevel": "JAVA_21",
-  "refmap": "betterharvestlevel.mixins.refmap.json",
-  "mixins": ["ItemStackMixin"],
+  "mixins": ["ItemStackMixin", "PlayerMixin"],
   "injectors": {
     "defaultRequire": 1
   }
