@@ -2,10 +2,11 @@
 
 ## v2.0.0
 
-- Full rewrite. This release targets NeoForge 1.21.1 only; the Forge and Fabric 1.20.1 modules and the Fabric 1.21.1 module are parked, with ports planned separately
+- Full rewrite, covering Forge/Fabric 1.20.1, Fabric/NeoForge 1.21.1, and Fabric/NeoForge 26.1.x and 26.2
+- On Fabric 26.2, Jade must be pinned to 26.2.8+fabric or older; 26.2.9+fabric rewrote the harvest tool API
 - Block overrides now work in both directions, raising or lowering a block's harvest requirement instead of only tightening it
 - Tool overrides can empower a tool, not just restrict it, and bare hands are handled through a reserved `hand` tier instead of ad-hoc special-casing
-- Enforcement moved to NeoForge's `HarvestCheck` event, removing all mixins from the mod
+- Enforcement moved to the harvest check event on NeoForge and Forge; Fabric uses a single ItemStack mixin, and the old mixin set is gone
 - Resolved rules now sync to clients on join and on reload, so multiplayer prediction and tooltips match the server
 - Jade shows the modified harvest requirements (required-tool icon and harvestability check), including custom tier icons via `iconItem`
 - Added `/bhl info`, `/bhl check`, and `/bhl reload` commands; reload re-resolves tag, mod, and regex overrides and re-syncs all clients, fixing the old reload bug

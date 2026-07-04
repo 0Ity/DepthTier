@@ -1,6 +1,5 @@
 package net.tysontheember.betterharvestlevel.forge.network;
 
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;

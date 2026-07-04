@@ -60,7 +60,7 @@ processResources {
         'mod_id'     : mod_id,
         'mod_author' : mod_author,
         'license'    : license,
-        'description': project.findProperty('description') ?: '',
+        'description': mod_description,
     ]
     filesMatching(['pack.mcmeta', 'META-INF/mods.toml']) {
         expand expandProps
