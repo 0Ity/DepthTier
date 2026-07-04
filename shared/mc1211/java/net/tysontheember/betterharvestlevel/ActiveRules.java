@@ -42,4 +42,12 @@ public final class ActiveRules {
     public TierRegistry tiers() {
         return tiers;
     }
+
+    public int blockRuleCount() {
+        return blocks.size();
+    }
+
+    public int itemRuleCount() {
+        return items.size();
+    }
 }

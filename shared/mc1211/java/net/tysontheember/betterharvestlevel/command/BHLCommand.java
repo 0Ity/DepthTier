@@ -3,9 +3,12 @@ package net.tysontheember.betterharvestlevel.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,6 +19,7 @@ import net.tysontheember.betterharvestlevel.BHLManager;
 import net.tysontheember.betterharvestlevel.HarvestVerdict;
 import net.tysontheember.betterharvestlevel.ServerRules;
 import net.tysontheember.betterharvestlevel.VanillaProbe;
+import net.tysontheember.betterharvestlevel.config.TierDefinition;
 
 public final class BHLCommand {
     private BHLCommand() {}
@@ -30,9 +34,12 @@ public final class BHLCommand {
     }
 
     private static int info(CommandContext<CommandSourceStack> context) {
-        BHLManager.tiers().ordered().forEach(tier ->
-                context.getSource().sendSuccess(() ->
-                        Component.literal(tier.name + " (level " + tier.level + ")"), false));
+        BHLManager.tiers().ordered().forEach(tier -> {
+            Component line = Component.empty()
+                    .append(tierName(tier.name))
+                    .append(Component.literal(" (level " + tier.level + ")").withStyle(ChatFormatting.GRAY));
+            context.getSource().sendSuccess(() -> line, false);
+        });
         return 1;
     }
 
@@ -49,14 +56,26 @@ public final class BHLCommand {
         String blockOverride = rules == null ? null : rules.blockTier(state.getBlock());
         String required = blockOverride != null ? blockOverride : VanillaProbe.requiredTier(state);
         String toolOverride = rules == null ? null : rules.itemTier(held.getItem());
-        String tool = toolOverride != null ? toolOverride : String.valueOf(VanillaProbe.toolTier(held));
+        String tool = toolOverride != null ? toolOverride : VanillaProbe.toolTier(held);
         boolean vanillaCan = player.hasCorrectToolForDrops(state);
         boolean can = rules == null ? vanillaCan
                 : HarvestVerdict.evaluate(rules, held, state, vanillaCan).orElse(vanillaCan);
-        context.getSource().sendSuccess(() -> Component.literal(
-                "block requires " + required + (blockOverride != null ? " (override)" : "")
-                        + ", tool is " + tool + (toolOverride != null ? " (override)" : "")
-                        + ", drops: " + (can ? "yes" : "no")), false);
+
+        MutableComponent message = Component.empty()
+                .append(Component.literal("Block requires ").withStyle(ChatFormatting.GRAY))
+                .append(tierName(required));
+        if (blockOverride != null) {
+            message.append(Component.literal(" (override)").withStyle(ChatFormatting.GRAY));
+        }
+        message.append(Component.literal(", tool is ").withStyle(ChatFormatting.GRAY));
+        message.append(tool != null ? tierName(tool) : Component.literal("Unknown").withStyle(ChatFormatting.GRAY));
+        if (toolOverride != null) {
+            message.append(Component.literal(" (override)").withStyle(ChatFormatting.GRAY));
+        }
+        message.append(Component.literal(", drops: ").withStyle(ChatFormatting.GRAY));
+        message.append(Component.literal(can ? "yes" : "no").withStyle(can ? ChatFormatting.GREEN : ChatFormatting.RED));
+
+        context.getSource().sendSuccess(() -> message, false);
         return 1;
     }
 
@@ -64,7 +83,25 @@ public final class BHLCommand {
         BHLManager.reload();
         ServerRules.rebuild();
         resyncAll.run();
-        context.getSource().sendSuccess(() -> Component.literal("BetterHarvestLevel reloaded"), true);
+        ActiveRules rules = ServerRules.current();
+        int tierCount = BHLManager.tiers().ordered().size();
+        int blockRuleCount = rules == null ? 0 : rules.blockRuleCount();
+        int itemRuleCount = rules == null ? 0 : rules.itemRuleCount();
+        context.getSource().sendSuccess(() -> Component.literal("BetterHarvestLevel reloaded ("
+                + tierCount + " tiers, " + blockRuleCount + " block rules, " + itemRuleCount + " tool rules)"), true);
         return 1;
+    }
+
+    private static Component tierName(String tier) {
+        TierDefinition def = BHLManager.tiers().byName(tier);
+        String label = def != null && def.displayName != null && !def.displayName.isBlank()
+                ? def.displayName
+                : Character.toUpperCase(tier.charAt(0)) + tier.substring(1);
+        MutableComponent text = Component.literal(label);
+        if (def != null && def.color != null) {
+            TextColor color = TextColor.parseColor(def.color).result().orElse(null);
+            if (color != null) text.withStyle(style -> style.withColor(color));
+        }
+        return text;
     }
 }
