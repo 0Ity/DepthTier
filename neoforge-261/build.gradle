@@ -6,7 +6,7 @@ plugins {
 def mcVersion = '26.1.2'
 
 base {
-    archivesName = "${mod_id}-neoforge-${mcVersion}"
+    archivesName = "${mod_id}-neoforge-26.1"
 }
 
 java {
