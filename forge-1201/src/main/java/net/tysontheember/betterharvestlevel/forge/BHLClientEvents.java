@@ -10,7 +10,7 @@ import net.tysontheember.betterharvestlevel.Constants;
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
 public final class BHLClientEvents {
     @SubscribeEvent
-    static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+    public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientRules.clear();
     }
 }
