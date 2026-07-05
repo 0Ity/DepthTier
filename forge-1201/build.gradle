@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
 base {
@@ -40,6 +41,10 @@ minecraft {
             }
         }
         client {
+            jvmArgs(
+                "-Dmixin.env.remapRefMap=true",
+                "-Dmixin.env.refMapRemappingFile=${projectDir}/build/createSrgToMcp/output.srg"
+            )
         }
         server {
             args '--nogui'
