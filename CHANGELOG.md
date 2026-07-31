@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fixed `tools.json` overrides failing to lower a tool's native harvest tier, including modded tools (#8)
+
 ## v2.0.0
 
 - Full rewrite, covering Forge/Fabric 1.20.1, Fabric/NeoForge 1.21.1, and Fabric/NeoForge 26.1.x and 26.2

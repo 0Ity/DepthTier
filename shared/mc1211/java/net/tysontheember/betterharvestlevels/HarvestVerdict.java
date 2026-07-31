@@ -20,7 +20,6 @@ public final class HarvestVerdict {
         String tool = toolOverride != null ? toolOverride : VanillaProbe.toolTier(stack);
         if (tool == null) return Optional.empty();
         boolean ok = VanillaProbe.toolTypeOk(stack, state) && rules.tiers().canMine(tool, required);
-        // ponytail: tool-only overrides can only grant; block overrides decide fully
-        return Optional.of(blockOverride != null ? ok : ok || vanillaVerdict);
+        return Optional.of(ok);
     }
 }
