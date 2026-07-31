@@ -1,12 +1,12 @@
 name: Question / Support
-description: Ask a question about using BetterHarvestLevel
+description: Ask a question about using Better Harvest Levels
 labels: ["question"]
 body:
   - type: markdown
     attributes:
       value: |
-        Need help with BetterHarvestLevel? Ask your question below.
-        Check the [documentation](https://tysontheember.dev/better-harvest-level/intro/) first - your answer might already be there!
+        Need help with Better Harvest Levels? Ask your question below.
+        Check the [documentation](https://tysontheember.dev/better-harvest-levels/intro/) first - your answer might already be there!
 
   - type: textarea
     id: question

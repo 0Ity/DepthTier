@@ -99,7 +99,7 @@ jobs:
         run: |
           shopt -s nullglob
           JARS=()
-          for f in ${{ matrix.subproject }}/build/libs/betterharvestlevel-*.jar; do
+          for f in ${{ matrix.subproject }}/build/libs/betterharvestlevels-*.jar; do
             basename="$(basename "$f")"
             if [[ "$basename" != *-sources.jar ]] && \
                [[ "$basename" != *-javadoc.jar ]] && \
@@ -213,12 +213,12 @@ jobs:
       - name: Publish ${{ matrix.name }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          modrinth-id: better-harvest-level
+          modrinth-id: z9ZHPD94
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           curseforge-id: "1494115"
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           files: jar/*.jar
-          name: "BetterHarvestLevel ${{ steps.version.outputs.version }} (${{ matrix.name }})"
+          name: "Better Harvest Levels ${{ steps.version.outputs.version }} (${{ matrix.name }})"
           version: ${{ steps.version.outputs.version }}+${{ matrix.subproject }}
           version-type: ${{ steps.vt.outputs.type }}
           changelog-file: CHANGELOG.md
@@ -265,7 +265,7 @@ jobs:
             echo ""
             echo "Pick the jar that matches your loader and Minecraft version. The same files are also on:"
             echo ""
-            echo "- [Modrinth](https://modrinth.com/mod/better-harvest-level/versions)"
+            echo "- [Modrinth](https://modrinth.com/mod/better-harvest-levels/versions)"
             echo "- [CurseForge](https://www.curseforge.com/projects/1494115)"
             echo ""
             echo "## Changelog"
@@ -303,7 +303,7 @@ jobs:
           esac
           PAYLOAD=$(jq -n \
             --arg tag "${{ github.ref_name }}" \
-            --arg name "BetterHarvestLevel $VERSION" \
+            --arg name "Better Harvest Levels $VERSION" \
             --rawfile body release-body.md \
             --argjson prerelease "$PRERELEASE" \
             '{tag_name:$tag, name:$name, body:$body, draft:false, prerelease:$prerelease}')
@@ -354,7 +354,7 @@ jobs:
           ' CHANGELOG.md)
 
           jq -n \
-            --arg mod "betterharvestlevel" \
+            --arg mod "betterharvestlevels" \
             --arg version "$VERSION" \
             --arg tag "${{ github.ref_name }}" \
             --arg changelog "$CHANGELOG" \

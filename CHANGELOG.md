@@ -3,6 +3,7 @@
 ## v2.0.0
 
 - Full rewrite, covering Forge/Fabric 1.20.1, Fabric/NeoForge 1.21.1, and Fabric/NeoForge 26.1.x and 26.2
+- Renamed the mod to Better Harvest Levels; existing `config/betterharvestlevel` folders migrate automatically to `config/betterharvestlevels`
 - On Fabric 26.2, Jade must be pinned to 26.2.8+fabric or older; 26.2.9+fabric rewrote the harvest tool API
 - Block overrides now work in both directions, raising or lowering a block's harvest requirement instead of only tightening it
 - Tool overrides can empower a tool, not just restrict it, and bare hands are handled through a reserved `hand` tier instead of ad-hoc special-casing

@@ -8,11 +8,11 @@
   "license": "${license}",
   "environment": "*",
   "entrypoints": {
-    "main": ["net.tysontheember.betterharvestlevel.fabric.BetterHarvestLevelFabric"],
-    "client": ["net.tysontheember.betterharvestlevel.fabric.BetterHarvestLevelFabricClient"],
-    "jade": ["net.tysontheember.betterharvestlevel.compat.jade.BHLJadePlugin"]
+    "main": ["net.tysontheember.betterharvestlevels.fabric.BetterHarvestLevelsFabric"],
+    "client": ["net.tysontheember.betterharvestlevels.fabric.BetterHarvestLevelsFabricClient"],
+    "jade": ["net.tysontheember.betterharvestlevels.compat.jade.BHLJadePlugin"]
   },
-  "mixins": ["betterharvestlevel.mixins.json"],
+  "mixins": ["betterharvestlevels.mixins.json"],
   "depends": {
     "fabricloader": ">=0.18.0",
     "fabric-api": "*",
