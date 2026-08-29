@@ -52,8 +52,14 @@ minecraft {
     }
 }
 
+mixin {
+    add sourceSets.main, 'betterharvestlevels.refmap.json'
+    config 'betterharvestlevels.mixins.json'
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     compileOnly fg.deobf('maven.modrinth:jade:11.12.3+forge')
     runtimeOnly fg.deobf('maven.modrinth:jade:11.12.3+forge')
 }

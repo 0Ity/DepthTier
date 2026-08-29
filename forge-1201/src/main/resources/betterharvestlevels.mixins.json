@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.tysontheember.betterharvestlevels.forge.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "betterharvestlevels.refmap.json",
+  "mixins": ["ItemStackMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
