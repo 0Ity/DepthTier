@@ -9,6 +9,7 @@ import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.tysontheember.betterharvestlevels.tier.TierRegistry;
 
@@ -45,6 +46,24 @@ public final class VanillaProbe {
             return BY_INCORRECT_TAG.get(tier.getIncorrectBlocksForDrops());
         }
         return stack.has(DataComponents.TOOL) ? null : TierRegistry.HAND;
+    }
+
+    public static String tierFloor(ItemStack stack) {
+        Tool tool = stack.get(DataComponents.TOOL);
+        if (tool == null) return null;
+        if (!denied(tool, Blocks.OBSIDIAN)) return "diamond";
+        if (!denied(tool, Blocks.DIAMOND_ORE)) return "iron";
+        if (!denied(tool, Blocks.IRON_ORE)) return "stone";
+        return "wood";
+    }
+
+    private static boolean denied(Tool tool, Block block) {
+        BlockState state = block.defaultBlockState();
+        for (Tool.Rule rule : tool.rules()) {
+            if (rule.correctForDrops().isEmpty() || rule.correctForDrops().get()) continue;
+            if (state.is(rule.blocks())) return true;
+        }
+        return false;
     }
 
     public static boolean toolTypeOk(ItemStack stack, BlockState state) {

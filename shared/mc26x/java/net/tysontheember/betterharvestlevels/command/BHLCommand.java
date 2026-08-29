@@ -141,7 +141,7 @@ public final class BHLCommand {
                     .withStyle(ChatFormatting.DARK_GRAY));
         }
         seg.append(Component.literal(" (tier ").withStyle(ChatFormatting.GRAY));
-        seg.append(tool != null ? tierName(tool) : Component.literal("Unknown").withStyle(ChatFormatting.GRAY));
+        seg.append(tool != null ? tierName(tool) : unknownTier(held));
         if (toolOverride != null) {
             seg.append(Component.literal(", override").withStyle(ChatFormatting.GRAY));
         }
@@ -168,6 +168,16 @@ public final class BHLCommand {
         if (state.is(BlockTags.MINEABLE_WITH_SHOVEL)) return "Shovel";
         if (state.is(BlockTags.MINEABLE_WITH_HOE)) return "Hoe";
         return "Tool";
+    }
+
+    private static Component unknownTier(ItemStack held) {
+        MutableComponent text = Component.literal("Unknown").withStyle(ChatFormatting.GRAY);
+        String floor = VanillaProbe.tierFloor(held);
+        TierDefinition def = floor == null ? null : BHLManager.tiers().byName(floor);
+        if (def != null) {
+            text.append(Component.literal(", level " + def.level + "+"));
+        }
+        return text;
     }
 
     private static Component tierName(String tier) {

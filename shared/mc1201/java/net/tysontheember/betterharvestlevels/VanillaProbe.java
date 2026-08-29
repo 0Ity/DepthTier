@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.Tiers;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.tysontheember.betterharvestlevels.tier.TierRegistry;
 
@@ -46,6 +47,13 @@ public final class VanillaProbe {
             };
         }
         return TOOL_TAGS.stream().anyMatch(stack::is) ? null : TierRegistry.HAND;
+    }
+
+    public static String tierFloor(ItemStack stack) {
+        if (stack.isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState())) return "diamond";
+        if (stack.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState())) return "iron";
+        if (stack.isCorrectToolForDrops(Blocks.IRON_ORE.defaultBlockState())) return "stone";
+        return null;
     }
 
     public static boolean toolTypeOk(ItemStack stack, BlockState state) {
