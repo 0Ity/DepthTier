@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Need help with DepthTier? Ask your question below.
-        Check the [documentation](https://tysontheember.dev/better-harvest-levels/intro/) first - your answer might already be there!
+        Check the [documentation](https://Ity_theember.dev/better-harvest-levels/intro/) first - your answer might already be there!
 
   - type: textarea
     id: question
