@@ -5,43 +5,14 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
-# Build every platform first, publish only if all eight jars built. A
-# workflow_dispatch run stops after the build job, which is enough to verify
-# the matrix compiles.
+# Build the single NeoForge 1.21.1 platform. A workflow_dispatch run stops
+# after the build job, which is enough to verify the project compiles.
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Forge 1.20.1
-            subproject: forge-1201
-            archive: forge-1.20.1
-          - name: Fabric 1.20.1
-            subproject: fabric-1201
-            archive: fabric-1.20.1
-          - name: Fabric 1.21.1
-            subproject: fabric-1211
-            archive: fabric-1.21.1
-          - name: NeoForge 1.21.1
-            subproject: neoforge-1211
-            archive: neoforge-1.21.1
-          - name: Fabric 26.1
-            subproject: fabric-261
-            archive: fabric-26.1
-          - name: NeoForge 26.1
-            subproject: neoforge-261
-            archive: neoforge-26.1
-          - name: Fabric 26.2
-            subproject: fabric-262
-            archive: fabric-26.2
-          - name: NeoForge 26.2
-            subproject: neoforge-262
-            archive: neoforge-26.2
 
-    name: Build ${{ matrix.name }}
+    name: Build NeoForge 1.21.1
 
     steps:
       - name: Checkout
@@ -53,8 +24,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      # Java 21 last so it stays the default JAVA_HOME; the Java 25 toolchain
-      # for 26.x targets is provisioned by the foojay resolver.
+      # Java 21 last so it stays the default JAVA_HOME.
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
@@ -83,23 +53,15 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Using version: $VERSION"
 
-      # forge-1201 is a nested ForgeGradle 6 build with its own Gradle 8.8
-      # wrapper; it is not part of the root Gradle 9 build.
-      - name: Build ${{ matrix.name }}
-        run: |
-          if [[ "${{ matrix.subproject }}" == "forge-1201" ]]; then
-            cd forge-1201
-            ./gradlew build -Pversion=${{ steps.version.outputs.version }} --no-daemon
-          else
-            ./gradlew :${{ matrix.subproject }}:build -Pversion=${{ steps.version.outputs.version }} --no-daemon
-          fi
+      - name: Build NeoForge 1.21.1
+        run: ./gradlew :neoforge-1211:build -Pversion=${{ steps.version.outputs.version }} --no-daemon
 
       - name: Resolve jar path
         id: jar
         run: |
           shopt -s nullglob
           JARS=()
-          for f in ${{ matrix.subproject }}/build/libs/betterharvestlevels-*.jar; do
+          for f in neoforge-1211/build/libs/betterharvestlevels-*.jar; do
             basename="$(basename "$f")"
             if [[ "$basename" != *-sources.jar ]] && \
                [[ "$basename" != *-javadoc.jar ]] && \
@@ -110,24 +72,24 @@ jobs:
             fi
           done
           if [[ ${#JARS[@]} -eq 0 ]]; then
-            echo "::error::No jar found for ${{ matrix.subproject }}"
+            echo "::error::No jar found for neoforge-1211"
             find . -path '*/build/libs/*.jar' -print
             exit 1
           fi
           if [[ ${#JARS[@]} -gt 1 ]]; then
-            echo "::error::Multiple jars found for ${{ matrix.subproject }}:"
+            echo "::error::Multiple jars found for neoforge-1211:"
             printf '  %s\n' "${JARS[@]}"
             exit 1
           fi
           echo "jar_path=${JARS[0]}" >> "$GITHUB_OUTPUT"
           echo "Resolved jar: ${JARS[0]}"
 
-      # One artifact per platform; publish-mod and forgejo-release download
-      # them, so nothing ships unless all eight builds succeed.
+      # One artifact; publish-mod and forgejo-release download it, so nothing
+      # ships unless the build succeeds.
       - name: Stash jar
         uses: actions/upload-artifact@v3
         with:
-          name: jar-${{ matrix.archive }}
+          name: jar-neoforge-1.21.1
           path: ${{ steps.jar.outputs.jar_path }}
           retention-days: 1
           if-no-files-found: error
@@ -136,52 +98,8 @@ jobs:
     needs: build
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Forge 1.20.1
-            subproject: forge-1201
-            archive: forge-1.20.1
-            game_versions: "1.20.1"
-            loader: forge
-          - name: Fabric 1.20.1
-            subproject: fabric-1201
-            archive: fabric-1.20.1
-            game_versions: "1.20.1"
-            loader: fabric
-          - name: Fabric 1.21.1
-            subproject: fabric-1211
-            archive: fabric-1.21.1
-            game_versions: "1.21.1"
-            loader: fabric
-          - name: NeoForge 1.21.1
-            subproject: neoforge-1211
-            archive: neoforge-1.21.1
-            game_versions: "1.21.1"
-            loader: neoforge
-          - name: Fabric 26.1
-            subproject: fabric-261
-            archive: fabric-26.1
-            game_versions: "26.1\n26.1.1\n26.1.2"
-            loader: fabric
-          - name: NeoForge 26.1
-            subproject: neoforge-261
-            archive: neoforge-26.1
-            game_versions: "26.1\n26.1.1\n26.1.2"
-            loader: neoforge
-          - name: Fabric 26.2
-            subproject: fabric-262
-            archive: fabric-26.2
-            game_versions: "26.2"
-            loader: fabric
-          - name: NeoForge 26.2
-            subproject: neoforge-262
-            archive: neoforge-26.2
-            game_versions: "26.2"
-            loader: neoforge
 
-    name: Publish ${{ matrix.name }}
+    name: Publish NeoForge 1.21.1
 
     steps:
       - name: Checkout
@@ -204,13 +122,13 @@ jobs:
             *)        echo "type=release" >> "$GITHUB_OUTPUT" ;;
           esac
 
-      - name: Download ${{ matrix.name }} jar
+      - name: Download NeoForge 1.21.1 jar
         uses: actions/download-artifact@v3
         with:
-          name: jar-${{ matrix.archive }}
+          name: jar-neoforge-1.21.1
           path: jar
 
-      - name: Publish ${{ matrix.name }}
+      - name: Publish NeoForge 1.21.1
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: z9ZHPD94
@@ -218,12 +136,12 @@ jobs:
           curseforge-id: "1494115"
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           files: jar/*.jar
-          name: "Better Harvest Levels ${{ steps.version.outputs.version }} (${{ matrix.name }})"
-          version: ${{ steps.version.outputs.version }}+${{ matrix.subproject }}
+          name: "Better Harvest Levels ${{ steps.version.outputs.version }} (NeoForge 1.21.1)"
+          version: ${{ steps.version.outputs.version }}+neoforge-1211
           version-type: ${{ steps.vt.outputs.type }}
           changelog-file: CHANGELOG.md
-          game-versions: ${{ matrix.game_versions }}
-          loaders: ${{ matrix.loader }}
+          game-versions: "1.21.1"
+          loaders: neoforge
 
   forgejo-release:
     needs: [publish-mod]
@@ -235,7 +153,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download all platform jars
+      - name: Download platform jar
         uses: actions/download-artifact@v3
         with:
           path: release-jars
@@ -246,7 +164,7 @@ jobs:
           mkdir -p flat
           mv -v release-jars/jar-*/*.jar flat/
           ls -lh flat/
-          test "$(ls flat/*.jar | wc -l)" -eq 8 || { echo "::error::expected 8 jars, got $(ls flat/*.jar | wc -l)"; exit 1; }
+          test "$(ls flat/*.jar | wc -l)" -eq 1 || { echo "::error::expected 1 jar, got $(ls flat/*.jar | wc -l)"; exit 1; }
 
       - name: Build release body
         id: body
@@ -330,7 +248,7 @@ jobs:
               "${{ github.server_url }}/api/v1/repos/${{ github.repository }}/releases/$RID/assets?name=$name" \
               > /dev/null
           done
-          echo "All 8 jars uploaded."
+          echo "All jars uploaded."
 
   notify-discord:
     needs: [publish-mod, forgejo-release]
@@ -359,14 +277,7 @@ jobs:
             --arg tag "${{ github.ref_name }}" \
             --arg changelog "$CHANGELOG" \
             --argjson platforms '[
-              "Forge 1.20.1",
-              "Fabric 1.20.1",
-              "Fabric 1.21.1",
-              "NeoForge 1.21.1",
-              "Fabric 26.1",
-              "NeoForge 26.1",
-              "Fabric 26.2",
-              "NeoForge 26.2"
+              "NeoForge 1.21.1"
             ]' \
             '{mod:$mod, version:$version, tag:$tag, changelog:$changelog, platforms:$platforms, ping:true}' \
             > payload.json

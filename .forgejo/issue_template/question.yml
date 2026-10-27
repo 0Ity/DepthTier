@@ -29,10 +29,7 @@ body:
     attributes:
       label: Mod Loader (if applicable)
       options:
-        - Forge 1.20.1
-        - Fabric 1.20.1
         - NeoForge 1.21.1
-        - Fabric 1.21.1
         - N/A
     validations:
       required: false

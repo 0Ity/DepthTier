@@ -1,11 +1,7 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { name = 'MinecraftForge'; url = uri('https://maven.minecraftforge.net/') }
         maven { name = 'NeoForge'; url = uri('https://maven.neoforged.net/releases') }
-        maven { name = 'Fabric'; url = uri('https://maven.fabricmc.net/') }
-        maven { name = 'Parchment'; url = uri('https://maven.parchmentmc.org') }
-        maven { name = 'Sponge'; url = uri('https://repo.spongepowered.org/repository/maven-public/') }
     }
 }
 
@@ -16,9 +12,3 @@ plugins {
 rootProject.name = 'BetterHarvestLevels'
 include 'common'
 include 'neoforge-1211'
-include 'neoforge-261'
-include 'neoforge-262'
-include 'fabric-1211'
-include 'fabric-261'
-include 'fabric-262'
-include 'fabric-1201'
