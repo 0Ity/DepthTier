@@ -1,11 +1,11 @@
 name: Question / Support
-description: Ask a question about using Better Harvest Levels
+description: Ask a question about using DepthTier
 labels: ["question"]
 body:
   - type: markdown
     attributes:
       value: |
-        Need help with Better Harvest Levels? Ask your question below.
+        Need help with DepthTier? Ask your question below.
         Check the [documentation](https://tysontheember.dev/better-harvest-levels/intro/) first - your answer might already be there!
 
   - type: textarea

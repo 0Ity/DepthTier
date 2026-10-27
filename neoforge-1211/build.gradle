@@ -103,7 +103,10 @@ def deployModpack = tasks.register('deployModpack') {
         def dest = file(modsDir.get())
         def jarFile = tasks.named('jar').get().archiveFile.get().asFile
 
-        dest.listFiles()?.findAll { it.name.startsWith("${mod_id}") && it.name.endsWith('.jar') }?.each {
+        def oldNames = ['depthtier', 'betterharvestlevels', 'betterharvestlevel']
+        dest.listFiles()?.findAll { f ->
+            f.name.endsWith('.jar') && oldNames.any { f.name.startsWith(it) }
+        }?.each {
             logger.lifecycle("deployModpack: removing old ${it.name}")
             if (!it.delete()) {
                 throw new GradleException("deployModpack: could not delete ${it.name} (is Minecraft running?)")

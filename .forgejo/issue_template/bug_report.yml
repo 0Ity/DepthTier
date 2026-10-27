@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug or crash with Better Harvest Levels
+description: Report a bug or crash with DepthTier
 labels: ["bug"]
 body:
   - type: markdown
@@ -20,7 +20,7 @@ body:
     id: mod-version
     attributes:
       label: Mod Version
-      description: The version of Better Harvest Levels you're using
+      description: The version of DepthTier you're using
       placeholder: e.g. 1.0.0
     validations:
       required: true

@@ -9,6 +9,6 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
-rootProject.name = 'BetterHarvestLevels'
+rootProject.name = 'DepthTier'
 include 'common'
 include 'neoforge-1211'

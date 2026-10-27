@@ -61,7 +61,7 @@ jobs:
         run: |
           shopt -s nullglob
           JARS=()
-          for f in neoforge-1211/build/libs/betterharvestlevels-*.jar; do
+          for f in neoforge-1211/build/libs/depthtier-*.jar; do
             basename="$(basename "$f")"
             if [[ "$basename" != *-sources.jar ]] && \
                [[ "$basename" != *-javadoc.jar ]] && \
@@ -136,7 +136,7 @@ jobs:
           curseforge-id: "1494115"
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           files: jar/*.jar
-          name: "Better Harvest Levels ${{ steps.version.outputs.version }} (NeoForge 1.21.1)"
+          name: "DepthTier ${{ steps.version.outputs.version }} (NeoForge 1.21.1)"
           version: ${{ steps.version.outputs.version }}+neoforge-1211
           version-type: ${{ steps.vt.outputs.type }}
           changelog-file: CHANGELOG.md
@@ -221,7 +221,7 @@ jobs:
           esac
           PAYLOAD=$(jq -n \
             --arg tag "${{ github.ref_name }}" \
-            --arg name "Better Harvest Levels $VERSION" \
+            --arg name "DepthTier $VERSION" \
             --rawfile body release-body.md \
             --argjson prerelease "$PRERELEASE" \
             '{tag_name:$tag, name:$name, body:$body, draft:false, prerelease:$prerelease}')
@@ -272,7 +272,7 @@ jobs:
           ' CHANGELOG.md)
 
           jq -n \
-            --arg mod "betterharvestlevels" \
+            --arg mod "depthtier" \
             --arg version "$VERSION" \
             --arg tag "${{ github.ref_name }}" \
             --arg changelog "$CHANGELOG" \
