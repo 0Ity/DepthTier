@@ -136,7 +136,7 @@ public final class OverrideResolver {
     private static void putWithConflictLog(Map<String, String> resolved, String id, String newTier, String kind) {
         String existing = resolved.put(id, newTier);
         if (existing != null && !existing.equals(newTier)) {
-            Constants.LOG.warn("BHL {} override conflict: '{}' changed from tier '{}' to '{}' (later override wins)",
+            Constants.LOG.warn("DT {} override conflict: '{}' changed from tier '{}' to '{}' (later override wins)",
                 kind, id, existing, newTier);
         }
     }

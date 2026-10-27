@@ -5,9 +5,9 @@ import snownee.jade.api.IWailaPlugin;
 import snownee.jade.api.WailaPlugin;
 
 @WailaPlugin
-public final class BHLJadePlugin implements IWailaPlugin {
+public final class DTJadePlugin implements IWailaPlugin {
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        BhlToolHandler.wrapAll();
+        DTToolHandler.wrapAll();
     }
 }

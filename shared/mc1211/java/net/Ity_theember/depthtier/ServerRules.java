@@ -4,7 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.Ity_theember.depthtier.config.BHLConfig;
+import net.Ity_theember.depthtier.config.DTConfig;
 import net.Ity_theember.depthtier.rules.ResolvedRules;
 import net.Ity_theember.depthtier.tier.OverrideResolver;
 
@@ -19,7 +19,7 @@ public final class ServerRules {
     private ServerRules() {}
 
     public static synchronized void rebuild() {
-        BHLConfig config = BHLManager.config();
+        DTConfig config = DTManager.config();
         ResolvedRules rules = new ResolvedRules();
         rules.tiers = config.getTiersConfig().getTiers();
         rules.equivalences = config.getEquivalencesConfig().getGroups();

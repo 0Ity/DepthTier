@@ -1,17 +1,17 @@
 package net.Ity_theember.depthtier;
 
-import net.Ity_theember.depthtier.config.BHLConfig;
+import net.Ity_theember.depthtier.config.DTConfig;
 import net.Ity_theember.depthtier.config.ConfigIO;
 import net.Ity_theember.depthtier.tier.TierRegistry;
 
 import java.nio.file.Path;
 
-public final class BHLManager {
+public final class DTManager {
     private static Path configDir;
-    private static BHLConfig config;
+    private static DTConfig config;
     private static TierRegistry tiers;
 
-    private BHLManager() {}
+    private DTManager() {}
 
     public static synchronized void init(Path dir) {
         configDir = dir;
@@ -39,7 +39,7 @@ public final class BHLManager {
                 tiers.ordered().size(), config.getBlockOverrides().size(), config.getToolOverrides().size());
     }
 
-    public static BHLConfig config() {
+    public static DTConfig config() {
         return config;
     }
 

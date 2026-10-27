@@ -17,30 +17,30 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.Ity_theember.depthtier.ActiveRules;
-import net.Ity_theember.depthtier.BHLManager;
+import net.Ity_theember.depthtier.DTManager;
 import net.Ity_theember.depthtier.HarvestVerdict;
 import net.Ity_theember.depthtier.ServerRules;
 import net.Ity_theember.depthtier.VanillaProbe;
 import net.Ity_theember.depthtier.config.TierDefinition;
 import net.Ity_theember.depthtier.tier.TierRegistry;
 
-public final class BHLCommand {
-    private BHLCommand() {}
+public final class DTCommand {
+    private DTCommand() {}
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, Runnable resyncAll) {
-        dispatcher.register(Commands.literal("bhl")
-                .then(Commands.literal("info").executes(BHLCommand::info))
+        dispatcher.register(Commands.literal("dt")
+                .then(Commands.literal("info").executes(DTCommand::info))
                 .then(Commands.literal("check")
-                        .executes(BHLCommand::check)
-                        .then(Commands.literal("hand").executes(BHLCommand::checkHand))
-                        .then(Commands.literal("block").executes(BHLCommand::checkBlock)))
+                        .executes(DTCommand::check)
+                        .then(Commands.literal("hand").executes(DTCommand::checkHand))
+                        .then(Commands.literal("block").executes(DTCommand::checkBlock)))
                 .then(Commands.literal("reload")
                         .requires(source -> source.hasPermission(2))
                         .executes(context -> reload(context, resyncAll))));
     }
 
     private static int info(CommandContext<CommandSourceStack> context) {
-        BHLManager.tiers().ordered().forEach(tier -> {
+        DTManager.tiers().ordered().forEach(tier -> {
             Component line = Component.empty()
                     .append(tierName(tier.name))
                     .append(Component.literal(" (level " + tier.level + ")").withStyle(ChatFormatting.GRAY));
@@ -150,11 +150,11 @@ public final class BHLCommand {
     }
 
     private static int reload(CommandContext<CommandSourceStack> context, Runnable resyncAll) {
-        BHLManager.reload();
+        DTManager.reload();
         ServerRules.rebuild();
         resyncAll.run();
         ActiveRules rules = ServerRules.current();
-        int tierCount = BHLManager.tiers().ordered().size();
+        int tierCount = DTManager.tiers().ordered().size();
         int blockRuleCount = rules == null ? 0 : rules.blockRuleCount();
         int itemRuleCount = rules == null ? 0 : rules.itemRuleCount();
         context.getSource().sendSuccess(() -> Component.literal("DepthTier reloaded ("
@@ -173,7 +173,7 @@ public final class BHLCommand {
     private static Component unknownTier(ItemStack held) {
         MutableComponent text = Component.literal("Unknown").withStyle(ChatFormatting.GRAY);
         String floor = VanillaProbe.tierFloor(held);
-        TierDefinition def = floor == null ? null : BHLManager.tiers().byName(floor);
+        TierDefinition def = floor == null ? null : DTManager.tiers().byName(floor);
         if (def != null) {
             text.append(Component.literal(", level " + def.level + "+"));
         }
@@ -181,7 +181,7 @@ public final class BHLCommand {
     }
 
     private static Component tierName(String tier) {
-        TierDefinition def = BHLManager.tiers().byName(tier);
+        TierDefinition def = DTManager.tiers().byName(tier);
         String label = def != null && def.displayName != null && !def.displayName.isBlank()
                 ? def.displayName
                 : Character.toUpperCase(tier.charAt(0)) + tier.substring(1);

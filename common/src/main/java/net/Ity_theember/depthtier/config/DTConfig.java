@@ -3,13 +3,13 @@ package net.Ity_theember.depthtier.config;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BHLConfig {
+public class DTConfig {
     private TiersConfig tiersConfig;
     private List<BlockOverride> blockOverrides;
     private List<ToolOverride> toolOverrides;
     private EquivalencesConfig equivalencesConfig;
 
-    public BHLConfig() {
+    public DTConfig() {
         this.tiersConfig = TiersConfig.createDefault();
         this.blockOverrides = new ArrayList<>();
         this.toolOverrides = new ArrayList<>();

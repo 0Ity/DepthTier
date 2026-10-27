@@ -22,7 +22,7 @@ import snownee.jade.api.JadeIds;
 import java.util.List;
 import java.util.Map;
 
-public final class BhlToolHandler implements ToolHandler {
+public final class DTToolHandler implements ToolHandler {
     private static final Map<ResourceLocation, TagKey<Block>> TOOL_CLASSES = Map.of(
             JadeIds.JADE("pickaxe"), BlockTags.MINEABLE_WITH_PICKAXE);
 
@@ -30,7 +30,7 @@ public final class BhlToolHandler implements ToolHandler {
     private final TagKey<Block> mineable;
     private final String toolName;
 
-    private BhlToolHandler(ToolHandler vanilla, TagKey<Block> mineable, String toolName) {
+    private DTToolHandler(ToolHandler vanilla, TagKey<Block> mineable, String toolName) {
         this.vanilla = vanilla;
         this.mineable = mineable;
         this.toolName = toolName;
@@ -40,7 +40,7 @@ public final class BhlToolHandler implements ToolHandler {
         TOOL_CLASSES.forEach((uid, tag) -> {
             ToolHandler existing = HarvestToolProvider.TOOL_HANDLERS.get(uid);
             if (existing != null) {
-                HarvestToolProvider.registerHandler(new BhlToolHandler(existing, tag, uid.getPath()));
+                HarvestToolProvider.registerHandler(new DTToolHandler(existing, tag, uid.getPath()));
             }
         });
     }

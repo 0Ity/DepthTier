@@ -16,13 +16,13 @@ import net.Ity_theember.depthtier.Constants;
 import net.Ity_theember.depthtier.HarvestVerdict;
 import net.Ity_theember.depthtier.RulesAccess;
 import net.Ity_theember.depthtier.ServerRules;
-import net.Ity_theember.depthtier.command.BHLCommand;
+import net.Ity_theember.depthtier.command.DTCommand;
 import net.Ity_theember.depthtier.network.RulesPayload;
 
 import java.util.List;
 
 @EventBusSubscriber(modid = Constants.MOD_ID)
-public final class BHLEvents {
+public final class DTEvents {
     @SubscribeEvent
     static void onHarvestCheck(PlayerEvent.HarvestCheck event) {
         ActiveRules rules = RulesAccess.get(event.getEntity().level());
@@ -54,7 +54,7 @@ public final class BHLEvents {
 
     @SubscribeEvent
     static void onRegisterCommands(RegisterCommandsEvent event) {
-        BHLCommand.register(event.getDispatcher(), () -> {
+        DTCommand.register(event.getDispatcher(), () -> {
             MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
             if (server == null) return;
             sendToPlayers(server.getPlayerList().getPlayers(), new RulesPayload(ServerRules.json()));

@@ -20,9 +20,9 @@ public final class ConfigIO {
 
     private ConfigIO() {}
 
-    public static BHLConfig load(Path configDir) {
+    public static DTConfig load(Path configDir) {
         Path folder = configFolder(configDir);
-        BHLConfig config = new BHLConfig();
+        DTConfig config = new DTConfig();
 
         if (!Files.exists(folder)) {
             save(configDir, config);
@@ -72,7 +72,7 @@ public final class ConfigIO {
         return config;
     }
 
-    public static void save(Path configDir, BHLConfig config) {
+    public static void save(Path configDir, DTConfig config) {
         try {
             Path folder = configDir.resolve(Constants.CONFIG_FOLDER_NAME);
             Files.createDirectories(folder);

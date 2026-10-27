@@ -20,7 +20,7 @@ class ConfigIOTest {
         Files.createDirectories(legacyFolder);
         Files.writeString(legacyFolder.resolve("tiers.json"), tiersJson("legacy"));
 
-        BHLConfig config = ConfigIO.load(configDir);
+        DTConfig config = ConfigIO.load(configDir);
         assertEquals("legacy", config.getTiersConfig().getTiers().get(0).name);
         assertTrue(Files.exists(configDir.resolve("depthtier/tiers.json")));
         assertFalse(Files.exists(legacyFolder));
@@ -32,7 +32,7 @@ class ConfigIOTest {
         Files.createDirectories(legacyFolder);
         Files.writeString(legacyFolder.resolve("tiers.json"), tiersJson("older"));
 
-        BHLConfig config = ConfigIO.load(configDir);
+        DTConfig config = ConfigIO.load(configDir);
         assertEquals("older", config.getTiersConfig().getTiers().get(0).name);
         assertTrue(Files.exists(configDir.resolve("depthtier/tiers.json")));
         assertFalse(Files.exists(legacyFolder));
@@ -47,7 +47,7 @@ class ConfigIOTest {
         Files.writeString(legacyFolder.resolve("tiers.json"), tiersJson("legacy"));
         Files.writeString(canonicalFolder.resolve("tiers.json"), tiersJson("canonical"));
 
-        BHLConfig config = ConfigIO.load(configDir);
+        DTConfig config = ConfigIO.load(configDir);
 
         assertEquals("canonical", config.getTiersConfig().getTiers().get(0).name);
         assertTrue(Files.exists(legacyFolder));
@@ -62,7 +62,7 @@ class ConfigIOTest {
         Files.writeString(newerLegacy.resolve("tiers.json"), tiersJson("newer"));
         Files.writeString(olderLegacy.resolve("tiers.json"), tiersJson("older"));
 
-        BHLConfig config = ConfigIO.load(configDir);
+        DTConfig config = ConfigIO.load(configDir);
 
         assertEquals("newer", config.getTiersConfig().getTiers().get(0).name);
         assertTrue(Files.exists(configDir.resolve("depthtier/tiers.json")));

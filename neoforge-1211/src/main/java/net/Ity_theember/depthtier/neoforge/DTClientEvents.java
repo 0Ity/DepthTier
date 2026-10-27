@@ -10,7 +10,7 @@ import net.Ity_theember.depthtier.Constants;
 import net.Ity_theember.depthtier.TierTooltip;
 
 @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
-public final class BHLClientEvents {
+public final class DTClientEvents {
     @SubscribeEvent
     static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientRules.clear();
