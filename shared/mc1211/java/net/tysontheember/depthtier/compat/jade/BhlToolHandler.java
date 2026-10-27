@@ -24,10 +24,7 @@ import java.util.Map;
 
 public final class BhlToolHandler implements ToolHandler {
     private static final Map<ResourceLocation, TagKey<Block>> TOOL_CLASSES = Map.of(
-            JadeIds.JADE("pickaxe"), BlockTags.MINEABLE_WITH_PICKAXE,
-            JadeIds.JADE("axe"), BlockTags.MINEABLE_WITH_AXE,
-            JadeIds.JADE("shovel"), BlockTags.MINEABLE_WITH_SHOVEL,
-            JadeIds.JADE("hoe"), BlockTags.MINEABLE_WITH_HOE);
+            JadeIds.JADE("pickaxe"), BlockTags.MINEABLE_WITH_PICKAXE);
 
     private final ToolHandler vanilla;
     private final TagKey<Block> mineable;
