@@ -77,3 +77,43 @@ processResources {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// Copies the built jar into the test modpack's mods folder (path from
+// gradle.properties). Skipped when the folder does not exist (e.g. CI).
+def deployModpack = tasks.register('deployModpack') {
+    group = 'distribution'
+    description = 'Copies the mod jar into the test modpack mods folder.'
+    dependsOn tasks.named('jar')
+
+    def modsDir = providers.gradleProperty('modpack_mods_dir')
+    onlyIf {
+        def dir = modsDir.getOrNull()
+        if (!dir) {
+            logger.lifecycle('deployModpack: modpack_mods_dir not set, skipping')
+            return false
+        }
+        if (!file(dir).exists()) {
+            logger.lifecycle("deployModpack: mods folder not found ($dir), skipping")
+            return false
+        }
+        return true
+    }
+
+    doLast {
+        def dest = file(modsDir.get())
+        def jarFile = tasks.named('jar').get().archiveFile.get().asFile
+
+        dest.listFiles()?.findAll { it.name.startsWith("${mod_id}") && it.name.endsWith('.jar') }?.each {
+            logger.lifecycle("deployModpack: removing old ${it.name}")
+            if (!it.delete()) {
+                throw new GradleException("deployModpack: could not delete ${it.name} (is Minecraft running?)")
+            }
+        }
+
+        def target = dest.toPath().resolve(jarFile.name)
+        java.nio.file.Files.copy(jarFile.toPath(), target, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        logger.lifecycle("deployModpack: deployed ${jarFile.name} -> ${dest}")
+    }
+}
+
+tasks.named('build').configure { finalizedBy(deployModpack) }

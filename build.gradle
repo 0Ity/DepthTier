@@ -1,0 +1,132 @@
+// Root project: release tooling only. Mod sources live in neoforge-1211.
+
+tasks.register('release') {
+    group = 'release'
+    description = 'Bumps the version, regenerates CHANGELOG.md from commits, commits and tags. Usage: gradlew release -Pbump=patch|minor|major'
+
+    def bumpProp = providers.gradleProperty('bump')
+    def repoDir = rootProject.projectDir
+    def propsFile = rootProject.file('gradle.properties')
+    def changelogFile = rootProject.file('CHANGELOG.md')
+
+    doLast {
+        def git = { List<String> args ->
+            def cmd = (['git'] + args).collect { it.toString() }
+            def proc = cmd.execute(null, repoDir)
+            def out = new ByteArrayOutputStream()
+            def err = new ByteArrayOutputStream()
+            proc.consumeProcessOutput(out, err)
+            proc.waitFor()
+            if (proc.exitValue() != 0) {
+                throw new GradleException("git ${args.join(' ')} failed:\n${new String(err.toByteArray(), 'UTF-8').trim()}")
+            }
+            new String(out.toByteArray(), 'UTF-8')
+        }
+
+        // 1. validate bump
+        def bump = bumpProp.getOrElse('patch')
+        if (!(bump in ['patch', 'minor', 'major'])) {
+            throw new GradleException("invalid -Pbump '${bump}' - expected patch, minor or major")
+        }
+
+        // 2. clean working tree
+        def status = git(['status', '--porcelain'])
+        if (status.trim()) {
+            throw new GradleException("working tree is not clean:\n${status}Commit or stash your changes first.")
+        }
+
+        // 3. current version from the gradle.properties file (not -Pversion)
+        def propsText = propsFile.getText('UTF-8')
+        def curMatcher = propsText =~ /(?m)^version=(.+)$/
+        if (!curMatcher.find()) {
+            throw new GradleException('version= not found in gradle.properties')
+        }
+        def current = curMatcher.group(1).trim()
+        def semver = current =~ /^(\d+)\.(\d+)\.(\d+)$/
+        if (!semver.find()) {
+            throw new GradleException("version '${current}' in gradle.properties is not numeric x.y.z")
+        }
+        def (maj, min, pat) = [semver.group(1) as int, semver.group(2) as int, semver.group(3) as int]
+        def next = bump == 'major' ? "${maj + 1}.0.0" :
+                   bump == 'minor' ? "${maj}.${min + 1}.0" :
+                                     "${maj}.${min}.${pat + 1}"
+
+        // 4. tag must not exist yet
+        if (git(['tag', '-l', "v${next}"]).trim()) {
+            throw new GradleException("tag v${next} already exists")
+        }
+
+        // 5. commits since the last reachable tag
+        def lastTag = null
+        try {
+            lastTag = git(['describe', '--tags', '--abbrev=0']).trim()
+        } catch (GradleException ignored) {
+            // no tags yet - changelog covers the whole history
+        }
+        def range = lastTag ? "${lastTag}..HEAD" : 'HEAD'
+        def log = git(['log', range, '--pretty=format:%s%x00%h%x00%b%x1e'])
+
+        def typeToSection = [feat: 'Features', fix: 'Bug Fixes', perf: 'Performance', revert: 'Reverts']
+        def sectionOrder = ['Breaking Changes', 'Features', 'Bug Fixes', 'Performance', 'Reverts']
+        def bySection = [:]
+        sectionOrder.each { bySection[it] = [] }
+
+        def RS = String.valueOf((char) 0x1E)
+        def NUL = String.valueOf((char) 0x00)
+        log.split(RS, -1).each { raw ->
+            def chunk = raw.trim()
+            if (!chunk) return
+            def fields = (chunk.split(NUL, 3)) as List
+            if (fields.size() < 3) return
+            def subject = fields[0].trim()
+            def hash = fields[1].trim()
+            def body = fields[2]
+
+            def cm = subject =~ /^(\w+)(?:\(([^)]*)\))?(!)?: (.+)$/
+            if (!cm.find()) return
+
+            def type = cm.group(1)
+            def scope = cm.group(2)
+            def breaking = cm.group(3) == '!' || (body =~ /BREAKING[- ]CHANGE:/)
+            def section = breaking ? 'Breaking Changes' : typeToSection[type]
+            if (!section) return
+
+            def desc = cm.group(4)
+            def bullet = scope ? "- **${scope}:** ${desc} (${hash})" : "- ${desc} (${hash})"
+            bySection[section] << bullet
+        }
+
+        def parts = sectionOrder.findAll { bySection[it] }.collect { name ->
+            "### ${name}\n\n" + bySection[name].join('\n')
+        }
+        def sectionBody = parts ? parts.join('\n\n') : '- Internal changes'
+
+        // 6. CHANGELOG must start with the header and not already have this version
+        def changelogText = changelogFile.getText('UTF-8')
+        if (changelogText.readLines().any { it.trim() == "## v${next}".toString() }) {
+            throw new GradleException("CHANGELOG.md already contains a section for v${next}")
+        }
+        def nl = changelogText.indexOf('\n')
+        if (nl < 0 || changelogText.substring(0, nl).trim() != '# Changelog') {
+            throw new GradleException('CHANGELOG.md must start with a "# Changelog" line')
+        }
+        def head = '# Changelog\n\n'
+        def tail = changelogText.substring(nl + 1).replaceFirst(/^(?:\r?\n)+/, '')
+        def newChangelog = (head + "## v${next}\n\n${sectionBody}\n\n" + tail).replaceAll(/\n+$/, '\n')
+
+        // 7. write version + changelog
+        def newProps = propsText.replaceFirst(/(?m)^version=[^\r\n]*/, "version=${next}")
+        propsFile.withWriter('UTF-8') { it.write(newProps) }
+        changelogFile.withWriter('UTF-8') { it.write(newChangelog) }
+
+        // 8. commit + annotated tag
+        git(['add', 'gradle.properties', 'CHANGELOG.md'])
+        git(['commit', '-m', "chore: prepare ${next} release"])
+        git(['tag', '-a', "v${next}", '-m', "v${next}"])
+
+        def total = sectionOrder.sum { bySection[it].size() }
+        logger.lifecycle("Released v${next} (was ${current})")
+        logger.lifecycle("Changelog section: ${total} entries since ${lastTag ?: 'start'}")
+        logger.lifecycle('Next: git push --follow-tags')
+    }
+}
