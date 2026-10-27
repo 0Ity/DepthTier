@@ -74,7 +74,7 @@ tasks.register('release') {
         def RS = String.valueOf((char) 0x1E)
         def NUL = String.valueOf((char) 0x00)
         log.split(RS, -1).each { raw ->
-            def chunk = raw.trim()
+            def chunk = raw.replaceFirst(/^(?:\r?\n)+/, '')
             if (!chunk) return
             def fields = (chunk.split(NUL, 3)) as List
             if (fields.size() < 3) return
