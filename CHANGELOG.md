@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.1.2
+
+### Features
+
+- rebrand project to DepthTier (f9f2268)
+
+### Bug Fixes
+
+- limit tier harvest filter to pickaxe-type tools (3863c6e)
+
 ## v2.1.1
 
 ### Features
