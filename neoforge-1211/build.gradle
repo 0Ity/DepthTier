@@ -63,6 +63,7 @@ processResources {
         'mod_id'                       : mod_id,
         'mod_author'                   : mod_author,
         'license'                      : license,
+        'credits'                      : credits,
         'description'                  : mod_description,
         'minecraft_version'            : mcVersion,
         'minecraft_version_range'      : '[1.21.1, 1.22)',
@@ -74,6 +75,15 @@ processResources {
         expand expandProps
     }
     inputs.properties(expandProps)
+}
+
+jar {
+    from(rootProject.file('LICENSE')) {
+        into 'META-INF'
+    }
+    from(rootProject.file('COPYING')) {
+        into 'META-INF'
+    }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
