@@ -1,6 +1,6 @@
 # DepthTier
 
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-green) ![Loader](https://img.shields.io/badge/NeoForge-21.1.256-orange) ![Version](https://img.shields.io/badge/version-2.1.3-blue) ![License](https://img.shields.io/badge/license-LGPL--3.0-lightgrey)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-green) ![Loader](https://img.shields.io/badge/NeoForge-21.1.256-orange) ![Version](https://img.shields.io/badge/version-2.1.4-blue) ![License](https://img.shields.io/badge/license-LGPL--3.0--only-lightgrey)
 
 Config-driven mining level progression for modpacks. Override block and tool tiers up or down, sync rules for multiplayer, and show harvest requirements in Jade.
 
@@ -14,7 +14,7 @@ While vanilla stops at seven mining levels, **DepthTier expands the progression 
 
 - **Two-way overrides** — raise *or* lower mining requirements for blocks, and buff or nerf tools (pickaxes, paxels, hammers). Works both directions.
 - **Full tier ladder** — define any number of tiers with custom levels, display names, colors, and representative items.
-- **Multiplayer-safe** — resolved rules are synced to clients on join and on reload, so mining prediction is always correct.
+- **Server-side rules** — rules are resolved on the server and synced to clients on join and on reload, so mining prediction is always correct. **Install it on the server as well as on clients** for multiplayer; a client-only install has no effect.
 - **Jade integration** *(optional)* — shows the modified harvest requirement when you look at a block.
 - **Harvest Tier tooltip** — tools display their tier name in the tooltip, colored to match. Toggle with `toolTierTooltip` in `client.json`.
 - **In-game commands** — inspect and debug your setup without leaving the game.
@@ -71,9 +71,12 @@ Ready-to-use tool overrides ship for:
 ## Credits
 
 - **Created by [Ity__](https://modrinth.com/user/Ity__)**
-- Originally released as *[BetterHarvestLevels](https://modrinth.com/mod/better-harvest-levels)* by **[TysonTheEmber](https://modrinth.com/user/TysonTheEmber)**
-- License: [LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.html)
+- Originally released as *[BetterHarvestLevels](https://modrinth.com/mod/better-harvest-levels)* by **[TysonTheEmber](https://modrinth.com/user/TysonTheEmber)** — DepthTier is a fork of that project and stays under the same license
+- License: [LGPL-3.0-only](https://www.gnu.org/licenses/lgpl-3.0.html) — full text in [LICENSE](LICENSE)
 
 ## Links
 
 - **[Modrinth](https://modrinth.com/mod/depthtier)**
+- **[Source code](https://github.com/0Ity/DepthTier)**
+- **[Issue tracker](https://github.com/0Ity/DepthTier/issues)**
+- **[Changelog](https://github.com/0Ity/DepthTier/releases)**
