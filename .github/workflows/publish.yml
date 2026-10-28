@@ -145,6 +145,8 @@ jobs:
     needs: [publish-mod]
     if: success() && github.ref_type == 'tag'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     name: Create GitHub release
 
     steps:
