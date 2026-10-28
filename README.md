@@ -70,8 +70,8 @@ Ready-to-use tool overrides ship for:
 
 ## Credits
 
-- **Created by [Ity_](https://modrinth.com/team/ity_)**
-- Originally released as *BetterHarvestLevels* by **TysonTheEmber**
+- **Created by [Ity__](https://modrinth.com/user/Ity__)**
+- Originally released as *[BetterHarvestLevels](https://modrinth.com/mod/better-harvest-levels)* by **[TysonTheEmber](https://modrinth.com/user/TysonTheEmber)**
 - License: [LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.html)
 
 ## Links
