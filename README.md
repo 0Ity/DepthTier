@@ -1,6 +1,6 @@
 # DepthTier
 
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-green) ![Loader](https://img.shields.io/badge/NeoForge-21.1.256-orange) ![Version](https://img.shields.io/badge/version-2.1.2-blue) ![License](https://img.shields.io/badge/license-LGPL--3.0-lightgrey)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-green) ![Loader](https://img.shields.io/badge/NeoForge-21.1.256-orange) ![Version](https://img.shields.io/badge/version-2.1.3-blue) ![License](https://img.shields.io/badge/license-LGPL--3.0-lightgrey)
 
 Config-driven mining level progression for modpacks. Override block and tool tiers up or down, sync rules for multiplayer, and show harvest requirements in Jade.
 
