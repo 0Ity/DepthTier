@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.1.4
+
+### Bug Fixes
+
+- declare Jade dependency and supported environments on Modrinth (5a4f0ee)
+- ship LGPL-3.0 license text and attribute the original author (cdf10f2)
+
 ## v2.1.3
 
 - Internal changes
