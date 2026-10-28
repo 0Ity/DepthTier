@@ -140,6 +140,9 @@ jobs:
           changelog-file: CHANGELOG.md
           game-versions: "1.21.1"
           loaders: neoforge
+          environment: client | server
+          dependencies: |
+            jade@*(recommended)
 
   github-release:
     needs: [publish-mod]
