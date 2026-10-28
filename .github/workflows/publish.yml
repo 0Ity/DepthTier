@@ -131,7 +131,7 @@ jobs:
       - name: Publish NeoForge 1.21.1
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          modrinth-id: z9ZHPD94
+          modrinth-id: nNoeLkCi
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           files: jar/*.jar
           name: "DepthTier ${{ steps.version.outputs.version }} (NeoForge 1.21.1)"
